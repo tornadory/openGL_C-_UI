@@ -5,15 +5,22 @@
 #include <ctime>
 #include "transform_mat.h"
 
-struct Animation
+struct AnimationInterface
+{
+    virtual void updateAnimation()= 0;
+    virtual bool isEnd()=0;
+};
+
+struct Animation:AnimationInterface
 {
 
 public:
 
     Animation(double i_time,double i_postpone=0.0)noexcept ;
-    virtual void updateAnimation()= 0;
+    virtual void updateAnimation()= 0 ;
+    virtual bool isEnd()noexcept override final  ;
 
-    bool _isEnd=false;
+
 
 protected:
 
@@ -21,6 +28,7 @@ protected:
     double  _time_end=0.0;
     double  _time_run=0.0;
     double  _postpone=0.0;
+    bool _isEnd=false;
 };
 
 /**
@@ -79,12 +87,12 @@ private:
 struct AnimationManager
 {
 public :
-    void addAnimation(const std::shared_ptr<Animation> &animation)noexcept;
+    void addAnimation(const std::shared_ptr<AnimationInterface> &animation)noexcept;
     void updateAnimations()noexcept;
     void removeAnimations()noexcept ;
 
 private :
-    std::list<std::shared_ptr<Animation>> _animations;
+    std::list<std::shared_ptr<AnimationInterface>> _animations;
 };
 
 

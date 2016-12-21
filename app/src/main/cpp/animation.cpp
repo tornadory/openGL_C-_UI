@@ -13,6 +13,12 @@ Animation::Animation(double i_time, double i_postpone)noexcept
     _time_end=_time_start+_time_run;
 }
 
+bool Animation::isEnd()noexcept
+{
+    return _isEnd;
+}
+
+
 //RotateAnimation======
 RotateAnimaton::RotateAnimaton(double i_time, float i_angle, Matrix3X2 *i_matrix, double i_postpone) noexcept:_angle(i_angle),_mat(i_matrix),Animation(i_time,i_postpone)
 {
@@ -104,7 +110,7 @@ void TransformAnimation::updateAnimation() noexcept
          x= _x;
          y= _y;
 
-        _isEnd=true;-
+        _isEnd=true;
 
     } else if(current_time<_time_start)
     {
@@ -126,7 +132,7 @@ void TransformAnimation::updateAnimation() noexcept
 }
 
 //AnimationManager=====
-void AnimationManager::addAnimation(const std::shared_ptr<Animation> &animation)noexcept
+void AnimationManager::addAnimation(const std::shared_ptr<AnimationInterface> &animation)noexcept
 {
     _animations.push_back(animation);
 }
@@ -135,7 +141,7 @@ void AnimationManager::updateAnimations() noexcept
 {
     for(auto  a:_animations)
     {
-        Animation & animation=*(a.get());
+        AnimationInterface & animation=*(a.get());
         animation.updateAnimation();
     }
 
@@ -150,7 +156,7 @@ void AnimationManager::removeAnimations()noexcept
 
         ++a;
 
-        if((*b)->_isEnd)
+        if((*b)->isEnd())
         {
             _animations.erase(b);
         }
