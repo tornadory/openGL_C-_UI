@@ -24,7 +24,8 @@ add_library( # Sets the name of the library.
               src/main/cpp/native_context.cpp
               src/main/cpp/transform_mat.cpp
               src/main/cpp/command_queue.cpp
-              src/main/cpp/animation.cpp)
+              src/main/cpp/animation.cpp
+              src/main/cpp/rect_1.cpp)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because system libraries are included in the search path by

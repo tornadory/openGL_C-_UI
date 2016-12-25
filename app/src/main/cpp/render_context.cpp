@@ -122,43 +122,14 @@ void RenderContext::initRectBuffer2()noexcept
 {
     array<float,8> v= {
 
-            -0.5f,0.5f,
-            -0.5f,-0.5f,
-            0.5f,0.5f,
-            0.5f,-0.5f
+           0.0f,0.0f,
+           1.0f,0.0f,
+           0.0f,1.0f,
+           1.0f,1.0f
 
     };
 
     _RectBuffer2=_RectBuffer2.create(&v[0],8);
-}
-
-void RenderContext::draw()noexcept
-{
-    glClearColor(0.0f,0.0f,1.0f,1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glViewport(0, 0, 480, 480);
-
-    _rectProgram.use();
-
-    _RectBuffer.bind();
-
-    _rectProgram.bindPos(2,0);
-    _rectProgram.setColor({1.0f,0.0f,0.0f,1.0f});
-    _rectProgram.setTransform(Matrix3X2());
-
-    glDrawArrays(GL_TRIANGLE_STRIP,0,4);
-
-    _RectBuffer2.bind();
-
-    _rectProgram.bindPos(2,0);
-    _rectProgram.setColor({1.0f,1.0f,1.0f,1.0f});
-    _rectProgram.setTransform(_mat2);
-
-    glDrawArrays(GL_TRIANGLE_STRIP,0,4);
-
-    _surface.swap();
-
 }
 
 void RenderContext::makeCurrent() const noexcept
@@ -188,20 +159,32 @@ void RenderContext::unbindThread()noexcept
     eglMakeCurrent(_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 }
 
-void RenderContext::setAnimation()noexcept
+RenderContext::RectProgram &RenderContext::getGLProgam() noexcept
 {
-    auto rotateAnimation = make_shared<RotateAnimaton>(3.0,5.0f,&_mat2);
-    auto scaleAnimation= make_shared<ScaleAnimation>(4,0.5f,&_mat2);
-    auto transformAnimation= make_shared<TransformAnimation>(5,0.3f,-0.2f,&_mat2);
-    _animationManger.addAnimation(rotateAnimation);
-    _animationManger.addAnimation(scaleAnimation);
-    _animationManger.addAnimation(transformAnimation);
+    return _rectProgram;
 }
 
-void RenderContext::updateAnimation() noexcept
+GLBuffer &RenderContext::getBuffer1()noexcept
 {
-    _animationManger.updateAnimations();
+    return _RectBuffer;
 }
+
+GLBuffer &RenderContext::getBuffer2()noexcept
+{
+    return _RectBuffer2;
+}
+
+GLSurface &RenderContext::getSurface() noexcept
+{
+    return _surface;
+}
+
+
+
+
+
+
+
 
 
 

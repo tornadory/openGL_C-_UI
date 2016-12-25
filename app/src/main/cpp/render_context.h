@@ -5,7 +5,6 @@
 #pragma once
 
 #include "transform_mat.h"
-#include "animation.h"
 
 struct RenderContext
 {
@@ -42,9 +41,12 @@ public:
     void unbindThread()noexcept ;
     void initRectBuffer()noexcept;
     void initRectBuffer2()noexcept;
-    void draw()noexcept;
-    void setAnimation()noexcept;
-    void updateAnimation() noexcept ;
+
+    RectProgram& getGLProgam()noexcept ;
+    GLBuffer& getBuffer1()noexcept ;
+    GLBuffer& getBuffer2()noexcept ;
+    GLSurface& getSurface()noexcept ;
+
 
 private:
 
@@ -59,6 +61,4 @@ private:
 
     Matrix3X2 _mat;
     Matrix3X2 _mat2;
-    AnimationManager _animationManger;
-
 };

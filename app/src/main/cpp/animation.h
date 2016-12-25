@@ -1,85 +1,100 @@
 //
 // Created by cheng on 2016/12/16.
 //
+#pragma once
 
 #include <ctime>
 #include "transform_mat.h"
+#include "rect_1.h"
 
+/**
+ * AnimationInterface
+ */
 struct AnimationInterface
 {
-    virtual void updateAnimation()= 0;
+    virtual void updateAnimation(double i_time)= 0;
     virtual bool isEnd()=0;
+    virtual void setpauseTime(double i_time)=0;
+    virtual void setResumeTime(double i_time)=0;
+
 };
 
-struct Animation:AnimationInterface
+/**
+ * RectAnimation
+ */
+struct RectAnimation:AnimationInterface
 {
-
 public:
-
-    Animation(double i_time,double i_postpone=0.0)noexcept ;
-    virtual void updateAnimation()= 0 ;
-    virtual bool isEnd()noexcept override final  ;
-
-
+    RectAnimation(shared_ptr<Rect> i_rect,double i_time,double i_start_time)noexcept;
+    virtual void updateAnimation( double i_time )=0;
+    virtual bool isEnd() noexcept override final ;
+    virtual void setpauseTime(double i_time)noexcept override final ;
+    virtual void setResumeTime(double i_time)noexcept override final ;
 
 protected:
+
+    shared_ptr<Rect> _rect;
 
     double  _time_start=0.0;
     double  _time_end=0.0;
     double  _time_run=0.0;
-    double  _postpone=0.0;
     bool _isEnd=false;
+
+    double _pause_time=0.0f;
+    double _resume_time=0.0f;
+    double _pause_total_time=0.0f;
 };
 
 /**
- * 旋转动画
- */
-struct RotateAnimaton:Animation
+* 旋转动画 ========ok====2016年12月24日
+*/
+struct RotateAnimaton:RectAnimation
 {
 public:
-    RotateAnimaton(double i_time,float i_angle,Matrix3X2* i_matrix,double i_postpone=0.0f)noexcept;
-    virtual  void updateAnimation()noexcept override  final ;
+    RotateAnimaton(shared_ptr<Rect> i_rect,double i_time,double i_start_time,float i_start_angle,float i_end_angle)noexcept;
+    virtual  void updateAnimation( double i_time )noexcept override  final ;
 
 private :
-    float _angle;
-    float _lastAngle=0.0f;
-
-    Matrix3X2 *  _mat;
+    float _startAngle; //-1~1 值的范围
+    float _endAngle;
 };
 
 /**
- * 缩放动画
+ * 缩放动画 ========ok====2016年12月25日
  */
-struct ScaleAnimation:Animation
+struct ScaleAnimation:RectAnimation
 {
 public :
-    ScaleAnimation(double i_time,float i_k ,Matrix3X2* i_matrix,double i_postpone=0.0f)noexcept ;
-    virtual  void updateAnimation()noexcept override  final ;
+    ScaleAnimation(shared_ptr<Rect> i_rect, double i_time,double i_start_time, float i_startyKx, float i_startKy,float i_endKx, float i_endKy)noexcept ;
+    ScaleAnimation(shared_ptr<Rect> i_rect,double i_time,double i_start_time,float i_startK,float i_endK)noexcept ;
+    virtual  void updateAnimation( double i_time )noexcept override  final ;
 private :
 
-    float _k;
-    float _lastK=1.0f;
+    float _startKx;
+    float _startKy;
 
-    Matrix3X2 * _mat;
+    float _endKx;
+    float _endKy;
 };
 
 /**
- * 平移动画
+ * 平移动画  ========ok====2016年12月24日
  */
 
-struct TransformAnimation:Animation
+struct TranslateAnimation:RectAnimation
 {
 public:
-    TransformAnimation(double i_time,float i_x,float i_y ,Matrix3X2* i_matrix,double i_postpone=0.0f)noexcept;
-    virtual  void updateAnimation()noexcept override  final ;
+    TranslateAnimation(shared_ptr<Rect> i_rect,double i_time,double i_start_time,float i_startX,float i_startY,float i_endX,float i_endY)noexcept;
+    virtual  void updateAnimation( double i_time )noexcept override  final ;
 private:
-    float _x;
-    float _y;
-    float _lastX=0.0f;
-    float _lastY=0.0f;
 
-    Matrix3X2 *_mat;
+    float _startX;
+    float _startY;
+    float _endX;
+    float _endY;
 };
+
+
 
 /**
  * AnimationManger 只能有一个
@@ -90,10 +105,10 @@ public :
     void addAnimation(const std::shared_ptr<AnimationInterface> &animation)noexcept;
     void updateAnimations()noexcept;
     void removeAnimations()noexcept ;
+    void pauseAnimations()noexcept ;
+    void resumeAnimations()noexcept ;
 
 private :
     std::list<std::shared_ptr<AnimationInterface>> _animations;
 };
-
-
 
