@@ -15,6 +15,7 @@ void NativeContext::changeSurface(JNIEnv *env, jobject i_surface, int i_width, i
     auto r=_commandQueue.addTask([=]{
 
         _rc.createSurface(window,i_width,i_height);
+        _rc.setScreenMatrix(i_width,i_height);
     });
 
     _signal.notifyOne();
@@ -57,7 +58,7 @@ void NativeContext::renderThread() noexcept
 
         }
 
-        _animationManager.updateAnimations();
+        _animationManager.updateAnimations(_timerOur.getCurrentTime());
         draw();
     }
 }
@@ -67,23 +68,29 @@ void NativeContext::onPauseActivity()noexcept
     uint64_t r=_commandQueue.addTask([this]{
 
         _isPause=true;
-        _animationManager.pauseAnimations();
+        _timerOur.setpauseTime(getTime());
 
     });
+
+    _signal.notifyOne();
 
     _commandQueue.waitFence(r);
 }
 
 void NativeContext::onResumeAcitity()noexcept
 {
-    _isPause= false;
 
-    _commandQueue.addTask([this]
+    double t=getTime();
+    uint64_t r=_commandQueue.addTask([this,t]
                           {
-                              _animationManager.resumeAnimations();
+                              _timerOur.setResumeTime(t);
+                              _isPause= false;
+
                           });
 
     _signal.notifyOne();
+
+    _commandQueue.waitFence(r);
 }
 
 void NativeContext::onDestorySurface() noexcept
@@ -105,27 +112,24 @@ void NativeContext::draw()noexcept {
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    _rect->draw(_rc.getBuffer2(),_rc.getGLProgam());
+    _rect->draw(_rc);
 
     _rc.getSurface().swap();
 }
 
 void NativeContext::initRect() noexcept
 {
-    _rect->setParentWidthHeight(_windowWidth,_windowHeight);
     _rect->setWidth(_windowWidth/3);
     _rect->setHeight(_windowHeight/2);
-    _rect->setCenter((_rect->getWidth())/2,(_rect->getHeight())/2);
+    _rect->setCenter(0.5f,0.5f);
 
     _rect->setInitVertex(20.0f,30.0f);
-    _rect->setTranslate(_rect->getInitVertexX(),_rect->getInitVertexY());
-
 }
 
 void NativeContext::addAnimation(shared_ptr<Rect> _rect) noexcept
 {
 
-    double time=getTime();
+    double time=TimerOur().getCurrentTime();
     TranslateAnimation t(_rect,10.0,time,5.0f,5.0f,9.0f,9.0f);
     ScaleAnimation s(_rect,10.0,time,1.0f,0.5f);
     RotateAnimaton r(_rect,10.0,time,0.0f,1.0f);

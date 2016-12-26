@@ -24,7 +24,7 @@ void Rect::setTranslate(float i_x, float i_y) noexcept
     _translate[1]=i_y;
 }
 
-void Rect::draw(GLBuffer & i_buffer,RenderContext::RectProgram& i_program) noexcept
+void Rect::draw(RenderContext & i_rendContext) noexcept
 {
     /**
      * buffer
@@ -36,10 +36,10 @@ void Rect::draw(GLBuffer & i_buffer,RenderContext::RectProgram& i_program) noexc
      * }
      */
 
-    i_buffer.bind();
+    i_rendContext.getBuffer2().bind();
 
-    i_program.bindPos(2,0);
-    i_program.setColor({1.0f,1.0f,1.0f,1.0f});
+    i_rendContext.getGLProgam().bindPos(2,0);
+    i_rendContext.getGLProgam().setColor({1.0f,1.0f,1.0f,1.0f});
 
     Matrix3X2 mat  //buffer *mat 变成 四个buffer对用的屏幕坐标系的坐标
             {
@@ -49,27 +49,21 @@ void Rect::draw(GLBuffer & i_buffer,RenderContext::RectProgram& i_program) noexc
 
             };
 
-    mat=mat.translate(-_center[0],-_center[1]);
+    mat=mat.translate(-_width*_center[0],-_heigt*_center[1]); //平移到原点，再进行缩放和旋转动画
 
     mat=mat.scale(_scale[0],_scale[1]); //缩放动画
     mat=mat.rotate(_rotate[0],_rotate[1]); //旋转动画
 
-    mat=mat.translate(_center[0],_center[1]);
+    mat=mat.translate(_center[0]*_width,_center[1]*_heigt); //从原点平移到原来的位置
 
     mat=mat.translate(_translate[0],_translate[1]);//位移动画
 
     //屏幕坐标系 -> openGL坐标系
-    float kx=1/_parent_width*2;
-    float ky=1/_parent_height*2;
-    mat=mat.scale(kx,ky);
-    mat=mat.scale(1,-1);
-    mat=mat.translate(-1,1);
+    mat=mat*i_rendContext.getScreenMatrix();
 
-    i_program.setTransform(mat);
+    i_rendContext.getGLProgam().setTransform(mat);
 
     glDrawArrays(GL_TRIANGLE_STRIP,0,4);
-
-    dbglog("===draw=====");
 
 }
 
@@ -85,8 +79,8 @@ void Rect::setHeight(float i_height) noexcept
 
 void Rect::setInitVertex(float i_width, float i_height) noexcept
 {
-    _init[0]=i_width;
-    _init[1]=i_height;
+    _translate[0]=i_width;
+    _translate[1]=i_height;
 }
 
 void Rect::setCenter(float i_x, float i_y)noexcept
@@ -94,46 +88,6 @@ void Rect::setCenter(float i_x, float i_y)noexcept
     _center[0]=i_x;
     _center[1]=i_y;
 }
-
-void Rect::setParentWidthHeight(float i_width, float i_height)noexcept
-{
-    _parent_width=i_width;
-    _parent_height=i_height;
-}
-
-float Rect::getWidth() noexcept
-{
-    return _width;
-}
-
-float Rect::getHeight()noexcept
-{
-    return _heigt;
-}
-
-float Rect::getInitVertexX() noexcept
-{
-    return _init[0];
-}
-
-float Rect::getInitVertexY()noexcept
-{
-    return _init[1];
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -14,8 +14,6 @@ struct AnimationInterface
 {
     virtual void updateAnimation(double i_time)= 0;
     virtual bool isEnd()=0;
-    virtual void setpauseTime(double i_time)=0;
-    virtual void setResumeTime(double i_time)=0;
 
 };
 
@@ -28,8 +26,6 @@ public:
     RectAnimation(shared_ptr<Rect> i_rect,double i_time,double i_start_time)noexcept;
     virtual void updateAnimation( double i_time )=0;
     virtual bool isEnd() noexcept override final ;
-    virtual void setpauseTime(double i_time)noexcept override final ;
-    virtual void setResumeTime(double i_time)noexcept override final ;
 
 protected:
 
@@ -39,10 +35,6 @@ protected:
     double  _time_end=0.0;
     double  _time_run=0.0;
     bool _isEnd=false;
-
-    double _pause_time=0.0f;
-    double _resume_time=0.0f;
-    double _pause_total_time=0.0f;
 };
 
 /**
@@ -103,10 +95,8 @@ struct AnimationManager
 {
 public :
     void addAnimation(const std::shared_ptr<AnimationInterface> &animation)noexcept;
-    void updateAnimations()noexcept;
+    void updateAnimations(double i_timerOur)noexcept;
     void removeAnimations()noexcept ;
-    void pauseAnimations()noexcept ;
-    void resumeAnimations()noexcept ;
 
 private :
     std::list<std::shared_ptr<AnimationInterface>> _animations;

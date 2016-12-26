@@ -28,6 +28,7 @@ private:
 
     shared_ptr<Rect> _rect=make_shared<Rect>();
     AnimationManager _animationManager;
+    TimerOur _timerOur;
 
     bool _isPause=false;
 

@@ -41,11 +41,13 @@ public:
     void unbindThread()noexcept ;
     void initRectBuffer()noexcept;
     void initRectBuffer2()noexcept;
+    void setScreenMatrix(float i_windowWidth,float i_windowHeight)noexcept ;
 
     RectProgram& getGLProgam()noexcept ;
     GLBuffer& getBuffer1()noexcept ;
     GLBuffer& getBuffer2()noexcept ;
     GLSurface& getSurface()noexcept ;
+    Matrix3X2& getScreenMatrix()noexcept ;
 
 
 private:
@@ -59,6 +61,6 @@ private:
     GLBuffer _RectBuffer;
     GLBuffer _RectBuffer2;
 
-    Matrix3X2 _mat;
-    Matrix3X2 _mat2;
+    Matrix3X2 _screenTransform;
+
 };

@@ -179,6 +179,29 @@ GLSurface &RenderContext::getSurface() noexcept
     return _surface;
 }
 
+void RenderContext::setScreenMatrix(float i_windowWidth, float i_windowHeight)noexcept
+{
+    //屏幕坐标系 -> openGL坐标系
+    float kx=1/i_windowWidth*2;
+    float ky=1/i_windowHeight*2;
+
+    //_screenTransform = Matrix3X2::scaling(kx, -ky).translate(-1, 1);
+
+    _screenTransform=Matrix3X2();
+    _screenTransform=_screenTransform.scale(kx,ky);
+    _screenTransform=_screenTransform.scale(1,-1);
+    _screenTransform=_screenTransform.translate(-1,1);
+}
+
+Matrix3X2 &RenderContext::getScreenMatrix()noexcept
+{
+    return _screenTransform;
+}
+
+
+
+
+
 
 
 
