@@ -18,12 +18,17 @@ public:
     //设置初始数据
     void setWidth(float i_width)noexcept ;
     void setHeight(float i_height)noexcept ;
-    void setInitVertex(float i_width,float i_height)noexcept;
+    void setInitVertex(float i_x,float i_y)noexcept;
     void setCenter(float i_x,float i_y)noexcept ;
+
+    float getWidth()noexcept ;
+    float getHeight()noexcept ;
+    float getCenterX()noexcept ;
+    float getCenterY()noexcept ;
 
 private:
     float _width;
-    float _heigt;
+    float _height;
     array<float,2> _center;  //比例
 
     array<float,2> _translate={0.0f,0.0f};
@@ -31,4 +36,3 @@ private:
     array<float,2> _scale={1.0f,1.0f};
 
 };
-

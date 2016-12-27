@@ -94,7 +94,7 @@ ScaleAnimation::ScaleAnimation(shared_ptr<Rect> i_rect, double i_time, double i_
 }
 
 ScaleAnimation::ScaleAnimation(shared_ptr<Rect> i_rect, double i_time, double i_start_time,
-                                float i_startX, float i_endY) noexcept :ScaleAnimation(i_rect,i_time,i_start_time,i_startX,i_startX,i_endY,i_endY)
+                               float i_startX, float i_endY) noexcept :ScaleAnimation(i_rect,i_time,i_start_time,i_startX,i_startX,i_endY,i_endY)
 {
 
 }
@@ -158,10 +158,5 @@ void TranslateAnimation::updateAnimation(double i_current_time )noexcept
 
     }
 
-    _rect->setTranslate(x, y);
+    _rect->setTranslate(x+_rect->getWidth()*_rect->getCenterX(), y+_rect->getHeight()*_rect->getCenterY());
 }
-
-
-
-
-

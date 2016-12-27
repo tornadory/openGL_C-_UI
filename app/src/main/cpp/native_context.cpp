@@ -130,7 +130,7 @@ void NativeContext::addAnimation(shared_ptr<Rect> _rect) noexcept
 {
 
     double time=TimerOur().getCurrentTime();
-    TranslateAnimation t(_rect,10.0,time,5.0f,5.0f,9.0f,9.0f);
+    TranslateAnimation t(_rect,10.0,time,50.0f,50.0f,90.0f,90.0f);
     ScaleAnimation s(_rect,10.0,time,1.0f,0.5f);
     RotateAnimaton r(_rect,10.0,time,0.0f,1.0f);
 

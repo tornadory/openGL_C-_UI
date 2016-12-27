@@ -44,17 +44,17 @@ void Rect::draw(RenderContext & i_rendContext) noexcept
     Matrix3X2 mat  //buffer *mat 变成 四个buffer对用的屏幕坐标系的坐标
             {
                     _width,0.0f,
-                    0.0f,_heigt,
+                    0.0f,_height,
                     0, 0
 
             };
 
-    mat=mat.translate(-_width*_center[0],-_heigt*_center[1]); //平移到原点，再进行缩放和旋转动画
+    mat=mat.translate(-_width*_center[0],-_height*_center[1]); //平移到原点，再进行缩放和旋转动画
 
     mat=mat.scale(_scale[0],_scale[1]); //缩放动画
     mat=mat.rotate(_rotate[0],_rotate[1]); //旋转动画
 
-    mat=mat.translate(_center[0]*_width,_center[1]*_heigt); //从原点平移到原来的位置
+//    mat=mat.translate(_center[0]*_width,_center[1]*_height); //从原点平移到原来的位置
 
     mat=mat.translate(_translate[0],_translate[1]);//位移动画
 
@@ -67,6 +67,12 @@ void Rect::draw(RenderContext & i_rendContext) noexcept
 
 }
 
+void Rect::setInitVertex(float i_x, float i_y) noexcept
+{
+    _translate[0]=i_x+_center[0]*_width;
+    _translate[1]=i_y+_center[1]*_height;
+}
+
 void Rect::setWidth(float i_width) noexcept
 {
     _width=i_width;
@@ -74,13 +80,7 @@ void Rect::setWidth(float i_width) noexcept
 
 void Rect::setHeight(float i_height) noexcept
 {
-    _heigt=i_height;
-}
-
-void Rect::setInitVertex(float i_width, float i_height) noexcept
-{
-    _translate[0]=i_width;
-    _translate[1]=i_height;
+    _height=i_height;
 }
 
 void Rect::setCenter(float i_x, float i_y)noexcept
@@ -89,9 +89,22 @@ void Rect::setCenter(float i_x, float i_y)noexcept
     _center[1]=i_y;
 }
 
+float Rect::getWidth() noexcept
+{
+    return _width;
+}
 
+float Rect::getHeight() noexcept
+{
+    return _height;
+}
 
+float Rect::getCenterX() noexcept
+{
+    return _center[0];
+}
 
-
-
-
+float Rect::getCenterY() noexcept
+{
+    return _center[1];
+}
