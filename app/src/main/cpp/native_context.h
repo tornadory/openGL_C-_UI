@@ -18,7 +18,7 @@ public:
      void onDestorySurface()noexcept ;
      void draw()noexcept;
      void initRect()noexcept;
-     void addAnimation(shared_ptr<Rect> _rect)noexcept ;
+     void addAnimation(shared_ptr<Rect> _rect,shared_ptr<Rect> _rect1,shared_ptr<Rect> _rect2)noexcept ;
 
 
 private:
@@ -27,6 +27,9 @@ private:
     Signal _signal;
 
     shared_ptr<Rect> _rect=make_shared<Rect>();
+    shared_ptr<Rect> _rect_1=make_shared<Rect>();
+    shared_ptr<Rect> _rect_2=make_shared<Rect>();
+
     AnimationManager _animationManager;
     TimerOur _timerOur;
 
