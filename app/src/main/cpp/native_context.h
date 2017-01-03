@@ -16,6 +16,11 @@ public:
      void onPauseActivity()noexcept ;
      void onResumeAcitity()noexcept ;
      void onDestorySurface()noexcept ;
+
+     void onPointerDown(float i_x, float i_y) noexcept;
+     void onPointerUp(float i_x, float i_y) noexcept;
+     void onPointerMoved(float i_x, float i_y) noexcept;
+
      void draw()noexcept;
      void initRect()noexcept;
      void addAnimation(shared_ptr<Rect> _rect,shared_ptr<Rect> _rect1,shared_ptr<Rect> _rect2)noexcept ;

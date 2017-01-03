@@ -54,7 +54,7 @@ void NativeContext::renderThread() noexcept
 
             initRect();
 
-            addAnimation(_rect,_rect_1,_rect_2);
+//            addAnimation(_rect,_rect_1,_rect_2);
 
         }
 
@@ -172,6 +172,39 @@ void NativeContext::addAnimation(shared_ptr<Rect> _rect,shared_ptr<Rect> _rect1,
     _animationManager.addAnimation(make_shared<ScaleAnimation>(s2));
     _animationManager.addAnimation(make_shared<RotateAnimaton>(r2));
 }
+
+void NativeContext::onPointerDown(float i_x, float i_y) noexcept
+{
+    _commandQueue.addTask([=]{
+
+        _rect->onPointerDown(i_x, i_y, (Matrix3X2()));
+
+    });
+}
+
+void NativeContext::onPointerUp(float i_x, float i_y)noexcept
+{
+    _commandQueue.addTask([=]{
+
+        _rect->onPointerUp(i_x,i_y);
+
+    });
+}
+
+void NativeContext::onPointerMoved(float i_x, float i_y) noexcept
+{
+    _commandQueue.addTask([=]{
+
+        _rect->onPointerMoved(i_x,i_y);
+
+    });
+}
+
+
+
+
+
+
 
 
 

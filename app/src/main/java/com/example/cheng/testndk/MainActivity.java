@@ -2,6 +2,7 @@ package com.example.cheng.testndk;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -16,6 +17,25 @@ public class MainActivity extends AppCompatActivity {
 
     private SurfaceView mSurfaceView;
     private long _native;
+    private int statusBar;
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+
+        switch (event.getAction())
+        {
+            case MotionEvent.ACTION_DOWN:
+                onPointerDown(event.getX(),event.getY()-statusBar,_native);
+                break;
+            case MotionEvent.ACTION_UP:
+                onPointerUp(event.getX(),event.getY()-statusBar,_native);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                onPointerMoved(event.getX(),event.getY()-statusBar,_native);
+                break;
+        }
+        return super.onTouchEvent(event);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,8 +79,15 @@ public class MainActivity extends AppCompatActivity {
                 renderThread(_native);
             }
         }.start();
-
         setContentView(mSurfaceView);
+
+
+
+        int resourceId=getResources().getIdentifier("status_bar_height","dimen","android");
+        if(resourceId>0)
+        {
+            statusBar=getResources().getDimensionPixelSize(resourceId);
+        }
     }
 
 
@@ -89,4 +116,8 @@ public class MainActivity extends AppCompatActivity {
     public native void onResumeActivity(long _native);
     public native void onPauseActivity(long _native);
     public native void destorySurface(long _native);
+
+    public native void onPointerDown(float i_x, float i_y,long _native);
+    public native void onPointerUp(float i_x, float i_y,long _native);
+    public native void onPointerMoved(float i_x, float i_y,long _native);
 }

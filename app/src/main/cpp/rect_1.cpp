@@ -123,6 +123,95 @@ array<float, 2> Rect::transformPosition(float i_x, float i_y) noexcept
     return { -_width * _center[0] + i_x, -_height * _center[1] + i_y };
 }
 
+void Rect::onPointerDown(float i_x, float i_y, Matrix3X2 i_parent_counter_matrix)noexcept
+{
+
+    if(isThisRectEvent(i_x, i_y,i_parent_counter_matrix))
+    {
+        bool isChildren=false;
+        for(auto i:_rectChildren)
+        {
+          if(i->isThisRectEvent(i_x, i_y,_inverse_matrix))
+            {
+                isChildren= true;
+
+                i->pointerDown(i_x,i_y);
+
+                break;
+            }
+        }
+
+        if(!isChildren)
+        {
+            pointerDown(i_x,i_y);
+        }
+    }
+}
+
+void Rect::onPointerUp(float i_x, float i_y)noexcept
+{
+
+}
+
+void Rect::onPointerMoved(float i_x, float i_y)noexcept
+{
+
+}
+
+void Rect::pointerDown(float i_x, float i_y)noexcept
+{
+    setColor({0.5f,0.5f,0.5f,1.0f});
+}
+
+void Rect::pointerUp(float i_x, float i_y)noexcept
+{
+
+}
+
+void Rect::pointerMoved(float i_x, float i_y)noexcept
+{
+
+}
+
+bool Rect::isThisRectEvent(float i_x, float i_y, Matrix3X2 i_parent_counter_matrix)noexcept
+{
+
+    _inverse_matrix=i_parent_counter_matrix.translate(-_translate[0],-_translate[1]); //平移到原点
+    _inverse_matrix=_inverse_matrix.rotate(_rotate[0],-_rotate[1]).scale(1/_scale[0],1/_scale[1]);
+
+    Matrix3X2 mat=_inverse_matrix.translate(_width*_center[0],_height*_center[1]).scale(1/_width,1/_height);
+
+    float x=i_x*mat.getElement(0,0)+i_y*mat.getElement(1,0)+mat.getElement(2,0);
+    float y=i_x*mat.getElement(0,1)+i_y*mat.getElement(1,1)+mat.getElement(2,1);
+
+    if(x>=0&&x<=1&&y>=0&&y<=1)
+    {
+        return true;
+    } else
+    {
+        return false;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

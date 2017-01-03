@@ -35,6 +35,8 @@ public:
     Matrix3X2 preRotate(float i_angle)noexcept ;
 
     const float * getElement() const noexcept ;
+    float getElement(int i_x,int i_y)noexcept ;
+
     Matrix3X2 concat(const Matrix3X2 &i_left) const noexcept;
 
 private:

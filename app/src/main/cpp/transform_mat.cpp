@@ -161,6 +161,13 @@ Matrix3X2 Matrix3X2::concat(const Matrix3X2 &i_left) const noexcept
     };
 }
 
+float Matrix3X2::getElement(int i_x, int i_y)noexcept
+{
+    return _m[i_x][i_y];
+}
+
+
+
 
 
 
