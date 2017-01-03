@@ -179,12 +179,12 @@ bool Rect::isThisRectEvent(float i_x, float i_y, Matrix3X2 i_parent_counter_matr
     _inverse_matrix=i_parent_counter_matrix.translate(-_translate[0],-_translate[1]); //平移到原点
     _inverse_matrix=_inverse_matrix.rotate(_rotate[0],-_rotate[1]).scale(1/_scale[0],1/_scale[1]);
 
-    Matrix3X2 mat=_inverse_matrix.translate(_width*_center[0],_height*_center[1]).scale(1/_width,1/_height);
+    Matrix3X2 mat=_inverse_matrix.translate(_width*_center[0],_height*_center[1]);
 
     float x=i_x*mat.getElement(0,0)+i_y*mat.getElement(1,0)+mat.getElement(2,0);
     float y=i_x*mat.getElement(0,1)+i_y*mat.getElement(1,1)+mat.getElement(2,1);
 
-    if(x>=0&&x<=1&&y>=0&&y<=1)
+    if(x>=0&&x<=_width&&y>=0&&y<=_height)
     {
         return true;
     } else
