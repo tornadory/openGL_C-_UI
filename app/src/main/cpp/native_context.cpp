@@ -54,7 +54,7 @@ void NativeContext::renderThread() noexcept
 
             initRect();
 
-//            addAnimation(_rect,_rect_1,_rect_2);
+            addAnimation(_rect,_rect_1,_rect_2);
 
         }
 

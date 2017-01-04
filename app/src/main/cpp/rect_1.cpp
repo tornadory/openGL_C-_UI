@@ -121,31 +121,40 @@ void Rect::draw(RenderContext &i_rendContext, Matrix3X2 i_matix) noexcept
 array<float, 2> Rect::transformPosition(float i_x, float i_y) noexcept
 {
     return { -_width * _center[0] + i_x, -_height * _center[1] + i_y };
+
 }
 
-void Rect::onPointerDown(float i_x, float i_y, Matrix3X2 i_parent_counter_matrix)noexcept
+bool Rect::onPointerDown(float i_x, float i_y, Matrix3X2 i_parent_inverse_matrix)noexcept
 {
 
-    if(isThisRectEvent(i_x, i_y,i_parent_counter_matrix))
+    i_parent_inverse_matrix=i_parent_inverse_matrix.translate(-this->_translate[0],-this->_translate[1]).rotate(this->_rotate[0],-this->_rotate[1]).scale(1/this->_scale[0],1/this->_scale[1]); //平移到原点
+
+    Matrix3X2 mat2=i_parent_inverse_matrix.translate(this->_width*this->_center[0],this->_height*this->_center[1]);
+
+    float x=i_x*mat2.getElement(0,0)+i_y*mat2.getElement(1,0)+mat2.getElement(2,0);
+    float y=i_x*mat2.getElement(0,1)+i_y*mat2.getElement(1,1)+mat2.getElement(2,1);
+
+
+    if(x>=0&&x<=this->_width&&y>=0&&y<=this->_height)
     {
-        bool isChildren=false;
-        for(auto i:_rectChildren)
+
+        for(auto i:this->_rectChildren)
         {
-          if(i->isThisRectEvent(i_x, i_y,_inverse_matrix))
+
+            if (i->onPointerDown(i_x, i_y, i_parent_inverse_matrix))
             {
-                isChildren= true;
-
-                i->pointerDown(i_x,i_y);
-
-                break;
+                return true;
             }
         }
 
-        if(!isChildren)
-        {
-            pointerDown(i_x,i_y);
-        }
+        this->pointerDown(i_x,i_y);
+        return true;
+
+    } else
+    {
+        return false;
     }
+
 }
 
 void Rect::onPointerUp(float i_x, float i_y)noexcept
@@ -172,40 +181,6 @@ void Rect::pointerMoved(float i_x, float i_y)noexcept
 {
 
 }
-
-bool Rect::isThisRectEvent(float i_x, float i_y, Matrix3X2 i_parent_counter_matrix)noexcept
-{
-
-    _inverse_matrix=i_parent_counter_matrix.translate(-_translate[0],-_translate[1]); //平移到原点
-    _inverse_matrix=_inverse_matrix.rotate(_rotate[0],-_rotate[1]).scale(1/_scale[0],1/_scale[1]);
-
-    Matrix3X2 mat=_inverse_matrix.translate(_width*_center[0],_height*_center[1]);
-
-    float x=i_x*mat.getElement(0,0)+i_y*mat.getElement(1,0)+mat.getElement(2,0);
-    float y=i_x*mat.getElement(0,1)+i_y*mat.getElement(1,1)+mat.getElement(2,1);
-
-    if(x>=0&&x<=_width&&y>=0&&y<=_height)
-    {
-        return true;
-    } else
-    {
-        return false;
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
