@@ -24,12 +24,15 @@ public:
      void draw()noexcept;
      void initRect()noexcept;
      void addAnimation(shared_ptr<Rect> _rect,shared_ptr<Rect> _rect1,shared_ptr<Rect> _rect2)noexcept ;
+     void setTouchRect(shared_ptr<Rect> i_rect)noexcept ;
 
 
 private:
     RenderContext _rc;
     CommandQueue _commandQueue;
     Signal _signal;
+
+    shared_ptr<Rect> _rectTouch;
 
     shared_ptr<Rect> _rect=make_shared<Rect>();
     shared_ptr<Rect> _rect_1=make_shared<Rect>();

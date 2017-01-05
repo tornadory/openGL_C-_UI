@@ -177,7 +177,12 @@ void NativeContext::onPointerDown(float i_x, float i_y) noexcept
 {
     _commandQueue.addTask([=]{
 
-        _rect->onPointerDown(i_x, i_y);
+        Rect * rect=_rect->onPointerDown(i_x, i_y);
+
+        if(rect)
+        {
+            _rectTouch=make_shared<Rect>(*rect);
+        }
 
     });
 }
@@ -186,7 +191,12 @@ void NativeContext::onPointerUp(float i_x, float i_y)noexcept
 {
     _commandQueue.addTask([=]{
 
-        _rect->onPointerUp(i_x,i_y);
+        if(_rectTouch.get())
+        {
+            _rectTouch->onPointerUp(i_x,i_y);
+        }
+
+        _rectTouch= nullptr;
 
     });
 }
@@ -195,7 +205,10 @@ void NativeContext::onPointerMoved(float i_x, float i_y) noexcept
 {
     _commandQueue.addTask([=]{
 
-        _rect->onPointerMoved(i_x,i_y);
+        if(_rectTouch.get())
+        {
+            _rectTouch->onPointerMoved(i_x, i_y);
+        }
 
     });
 }

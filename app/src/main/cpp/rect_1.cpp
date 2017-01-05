@@ -124,7 +124,7 @@ array<float, 2> Rect::transformPosition(float i_x, float i_y) noexcept
 
 }
 
-bool Rect::onPointerDown(float i_x, float i_y)noexcept
+Rect * Rect::onPointerDown(float i_x, float i_y)noexcept
 {
     auto mat = Matrix3X2::translation(-this->_translate[0],-this->_translate[1]).rotate(this->_rotate[0],-this->_rotate[1]).scale(1/this->_scale[0],1/this->_scale[1]);
 
@@ -141,29 +141,29 @@ bool Rect::onPointerDown(float i_x, float i_y)noexcept
 
             if (i->onPointerDown(p[0], p[1]))
             {
-                return true;
+                return i.get();
             }
         }
 
         this->pointerDown(x, y);
 
-        return true;
+        return this;
 
     } else
     {
-        return false;
+        return nullptr;
     }
 
 }
 
 void Rect::onPointerUp(float i_x, float i_y)noexcept
 {
-
+    dbglog("onPointerUp===%f===%f===%f",_width,i_x,i_y);
 }
 
 void Rect::onPointerMoved(float i_x, float i_y)noexcept
 {
-
+    dbglog("onPointerMoved===%f===%f===%f",_width,i_x,i_y);
 }
 
 void Rect::pointerDown(float i_x, float i_y)noexcept
@@ -180,6 +180,8 @@ void Rect::pointerMoved(float i_x, float i_y)noexcept
 {
 
 }
+
+
 
 
 
