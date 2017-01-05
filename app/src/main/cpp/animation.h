@@ -24,7 +24,6 @@ struct RectAnimation:AnimationInterface
 {
 public:
     RectAnimation(shared_ptr<Rect> i_rect,double i_time,double i_start_time)noexcept;
-    virtual void updateAnimation( double i_time )=0;
     virtual bool isEnd() noexcept override final ;
 
 protected:

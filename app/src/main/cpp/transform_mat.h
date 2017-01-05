@@ -39,6 +39,8 @@ public:
 
     Matrix3X2 concat(const Matrix3X2 &i_left) const noexcept;
 
+    array<float, 2> transformPoint(const array<float, 2> &i_point) const noexcept;
+
 private:
 
     std::array<std::array<float,2>,3> _m=
@@ -52,3 +54,4 @@ private:
 };
 
 Matrix3X2 operator*(const Matrix3X2 &i_a, const Matrix3X2 &i_b) noexcept;
+array<float, 2> operator*(const array<float, 2> &i_p, const Matrix3X2 &i_m) noexcept;

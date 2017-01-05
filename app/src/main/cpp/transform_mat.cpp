@@ -150,6 +150,12 @@ Matrix3X2 operator*(const Matrix3X2 &i_a, const Matrix3X2 &i_b) noexcept
     return i_a.concat(i_b);
 }
 
+array<float, 2> operator*(const array<float, 2> &i_p, const Matrix3X2 &i_m) noexcept
+{
+    return i_m.transformPoint(i_p);
+}
+
+
 Matrix3X2 Matrix3X2::concat(const Matrix3X2 &i_left) const noexcept
 {
     return {
@@ -165,6 +171,13 @@ float Matrix3X2::getElement(int i_x, int i_y)noexcept
 {
     return _m[i_x][i_y];
 }
+
+array<float, 2> Matrix3X2::transformPoint(const array<float, 2> &i_point) const noexcept
+{
+    return { i_point[0] * _m[0][0] + i_point[1] * _m[1][0] + _m[2][0], i_point[0] * _m[0][1] + i_point[1] * _m[1][1] + _m[2][1] };
+}
+
+
 
 
 

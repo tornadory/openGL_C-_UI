@@ -28,7 +28,7 @@ public:
     float getCenterX()noexcept ;
     float getCenterY()noexcept ;
 
-    bool onPointerDown(float i_x, float i_y, Matrix3X2 i_parent_counter_matrix)noexcept ;
+    bool onPointerDown(float i_x, float i_y)noexcept ;
     void onPointerUp(float i_x, float i_y) noexcept;
     void onPointerMoved(float i_x, float i_y) noexcept;
 

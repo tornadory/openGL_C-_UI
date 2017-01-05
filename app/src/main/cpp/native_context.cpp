@@ -177,7 +177,7 @@ void NativeContext::onPointerDown(float i_x, float i_y) noexcept
 {
     _commandQueue.addTask([=]{
 
-        _rect->onPointerDown(i_x, i_y, (Matrix3X2()));
+        _rect->onPointerDown(i_x, i_y);
 
     });
 }
