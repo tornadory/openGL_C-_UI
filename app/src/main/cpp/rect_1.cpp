@@ -28,6 +28,8 @@ void Rect::setInitVertex(float i_x, float i_y) noexcept
 {
     _translate[0]=i_x+_center[0]*_width;
     _translate[1]=i_y+_center[1]*_height;
+
+    setInitTranslate(_translate[0],_translate[1]);
 }
 
 void Rect::setWidth(float i_width) noexcept
@@ -69,6 +71,27 @@ float Rect::getCenterY() noexcept
 void Rect::setColor(array<float, 4> i_color) noexcept
 {
     _color=i_color;
+}
+
+void Rect::setTouchListener(TouchListener *i_touchListener) noexcept
+{
+    _touchListener=i_touchListener;
+}
+
+float Rect::getInitTranslateX() noexcept
+{
+    return _initTranslate[0];
+}
+
+float Rect::getInitTranslateY() noexcept
+{
+    return _initTranslate[1];
+}
+
+void Rect::setInitTranslate(float i_x, float i_y)noexcept
+{
+    _initTranslate[0]=i_x;
+    _initTranslate[1]=i_y;
 }
 
 void Rect::addRectChild(shared_ptr<Rect> i_rect)noexcept
@@ -128,6 +151,8 @@ Rect * Rect::onPointerDown(float i_x, float i_y)noexcept
 {
     auto mat = Matrix3X2::translation(-this->_translate[0],-this->_translate[1]).rotate(this->_rotate[0],-this->_rotate[1]).scale(1/this->_scale[0],1/this->_scale[1]);
 
+    this->_inverseMatrix=mat;
+
     auto p = mat.transformPoint({i_x, i_y});
 
     float x = p[0] + _center[0] * _width;
@@ -145,7 +170,18 @@ Rect * Rect::onPointerDown(float i_x, float i_y)noexcept
             }
         }
 
-        this->pointerDown(x, y);
+//        this->pointerDown(x, y);
+
+
+        if(_touchListener!= nullptr)
+        {
+
+            dbglog("===========touchDown  rect============");
+            this->_touchListener->touchDown(p[0],p[1]);
+        }
+
+
+        dbglog("onPointerUp=%f==%f===%f==",_width,p[0],p[1]);
 
         return this;
 
@@ -158,12 +194,29 @@ Rect * Rect::onPointerDown(float i_x, float i_y)noexcept
 
 void Rect::onPointerUp(float i_x, float i_y)noexcept
 {
-    dbglog("onPointerUp===%f===%f===%f",_width,i_x,i_y);
+    auto p=this->_inverseMatrix.transformPoint({i_x, i_y});
+
+    dbglog("onPointerUp=%f==%f===%f==",_width,p[0],p[1]);
+
+    if(_touchListener!= nullptr)
+    {
+        _touchListener->touchUp(p[0],p[1]);
+    }
 }
 
 void Rect::onPointerMoved(float i_x, float i_y)noexcept
 {
-    dbglog("onPointerMoved===%f===%f===%f",_width,i_x,i_y);
+
+    auto p=this->_inverseMatrix.transformPoint({i_x, i_y});
+
+    dbglog("onPointerMoved=%f==%f===%f==",_width,p[0],p[1]);
+
+    if(_touchListener!= nullptr)
+    {
+        _touchListener->touchMove(p[0],p[1]);
+    }
+
+
 }
 
 void Rect::pointerDown(float i_x, float i_y)noexcept
@@ -171,15 +224,13 @@ void Rect::pointerDown(float i_x, float i_y)noexcept
     setColor({0.5f,0.5f,0.5f,1.0f});
 }
 
-void Rect::pointerUp(float i_x, float i_y)noexcept
-{
 
-}
 
-void Rect::pointerMoved(float i_x, float i_y)noexcept
-{
 
-}
+
+
+
+
 
 
 

@@ -8,7 +8,7 @@
 #include "rect_1.h"
 #include "animation.h"
 
-struct NativeContext
+struct NativeContext:TouchListener
 {
 public:
      void changeSurface(JNIEnv *env,jobject i_surface,int i_width,int i_height)noexcept ;
@@ -17,14 +17,18 @@ public:
      void onResumeAcitity()noexcept ;
      void onDestorySurface()noexcept ;
 
-     void onPointerDown(float i_x, float i_y) noexcept;
+     void onPointerDown(int i_point_id, float i_x, float i_y) noexcept;
      void onPointerUp(float i_x, float i_y) noexcept;
-     void onPointerMoved(float i_x, float i_y) noexcept;
+     void onPointerMoved(int i_point_id, float i_x, float i_y) noexcept;
 
      void draw()noexcept;
      void initRect()noexcept;
      void addAnimation(shared_ptr<Rect> _rect,shared_ptr<Rect> _rect1,shared_ptr<Rect> _rect2)noexcept ;
-     void setTouchRect(shared_ptr<Rect> i_rect)noexcept ;
+
+     virtual void touchMove(float i_dx, float i_dy) noexcept override final;
+     virtual void touchDown(float i_dx, float i_dy) noexcept override final;
+     virtual void touchUp(float i_dx, float i_dy) noexcept override final;
+
 
 
 private:
@@ -32,11 +36,14 @@ private:
     CommandQueue _commandQueue;
     Signal _signal;
 
-    shared_ptr<Rect> _rectTouch;
+    Rect * _rectTouch;
 
     shared_ptr<Rect> _rect=make_shared<Rect>();
     shared_ptr<Rect> _rect_1=make_shared<Rect>();
     shared_ptr<Rect> _rect_2=make_shared<Rect>();
+
+    float _down_x=0;
+    float _down_y=0;
 
     AnimationManager _animationManager;
     TimerOur _timerOur;

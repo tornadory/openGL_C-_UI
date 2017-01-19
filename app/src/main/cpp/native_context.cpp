@@ -141,6 +141,8 @@ void NativeContext::initRect() noexcept
 
     _rect->addRectChild(_rect_1);
     _rect->addRectChild(_rect_2);
+
+    _rect.get()->setTouchListener(this);
 }
 
 void NativeContext::addAnimation(shared_ptr<Rect> _rect,shared_ptr<Rect> _rect1,shared_ptr<Rect> _rect2) noexcept
@@ -160,28 +162,33 @@ void NativeContext::addAnimation(shared_ptr<Rect> _rect,shared_ptr<Rect> _rect1,
     RotateAnimaton r2(_rect2,10.0,time,0.0f,1.0f);
 
 
-    _animationManager.addAnimation(make_shared<TranslateAnimation>(t));
-    _animationManager.addAnimation(make_shared<ScaleAnimation>(s));
-    _animationManager.addAnimation(make_shared<RotateAnimaton>(r));
-
-    _animationManager.addAnimation(make_shared<TranslateAnimation>(t1));
-    _animationManager.addAnimation(make_shared<ScaleAnimation>(s1));
-    _animationManager.addAnimation(make_shared<RotateAnimaton>(r1));
-
-    _animationManager.addAnimation(make_shared<TranslateAnimation>(t2));
-    _animationManager.addAnimation(make_shared<ScaleAnimation>(s2));
-    _animationManager.addAnimation(make_shared<RotateAnimaton>(r2));
+//    _animationManager.addAnimation(make_shared<TranslateAnimation>(t));
+//    _animationManager.addAnimation(make_shared<ScaleAnimation>(s));
+//    _animationManager.addAnimation(make_shared<RotateAnimaton>(r));
+//
+//    _animationManager.addAnimation(make_shared<TranslateAnimation>(t1));
+//    _animationManager.addAnimation(make_shared<ScaleAnimation>(s1));
+//    _animationManager.addAnimation(make_shared<RotateAnimaton>(r1));
+//
+//    _animationManager.addAnimation(make_shared<TranslateAnimation>(t2));
+//    _animationManager.addAnimation(make_shared<ScaleAnimation>(s2));
+//    _animationManager.addAnimation(make_shared<RotateAnimaton>(r2));
 }
 
-void NativeContext::onPointerDown(float i_x, float i_y) noexcept
+void NativeContext::onPointerDown(int i_point_id, float i_x, float i_y) noexcept
 {
     _commandQueue.addTask([=]{
 
-        Rect * rect=_rect->onPointerDown(i_x, i_y);
-
-        if(rect)
+        if(_rect)
         {
-            _rectTouch=make_shared<Rect>(*rect);
+            Rect * rect=_rect->onPointerDown(i_x, i_y);
+
+            if(rect)
+            {
+                _rectTouch=rect;
+            }
+
+//            dbglog("pointDown===%d===%f===%f===",i_point_id,i_x,i_y);
         }
 
     });
@@ -191,27 +198,55 @@ void NativeContext::onPointerUp(float i_x, float i_y)noexcept
 {
     _commandQueue.addTask([=]{
 
-        if(_rectTouch.get())
+        if(_rectTouch)
         {
             _rectTouch->onPointerUp(i_x,i_y);
         }
 
         _rectTouch= nullptr;
 
+//        dbglog("onPointerUp=====%f===%f===",i_x,i_y);
     });
 }
 
-void NativeContext::onPointerMoved(float i_x, float i_y) noexcept
+void NativeContext::onPointerMoved(int i_point_id, float i_x, float i_y) noexcept
 {
     _commandQueue.addTask([=]{
 
-        if(_rectTouch.get())
+        if(_rectTouch)
         {
             _rectTouch->onPointerMoved(i_x, i_y);
+
+//            dbglog("onPointerMoved===%d===%f===%f===",i_point_id,i_x,i_y);
         }
 
     });
 }
+
+void NativeContext::touchMove(float i_dx, float i_dy) noexcept
+{
+    dbglog("%f====%f====%f==x==",_down_x,i_dx,i_dx-_down_x);
+    dbglog("%f====%f====%f===y=",_down_y,i_dy,i_dy-_down_y);
+
+    _rect_2.get()->setTranslate(i_dx-_down_x+_rect_2->getInitTranslateX(),i_dy-_down_y+_rect_2->getInitTranslateY());
+}
+
+void NativeContext::touchDown(float i_dx, float i_dy) noexcept
+{
+    _down_x=i_dx;
+    _down_y=i_dy;
+}
+
+void NativeContext::touchUp(float i_dx, float i_dy) noexcept
+{
+    _rect_2.get()->setInitTranslate(i_dx-_down_x+_rect_2->getInitTranslateX(),i_dy-_down_y+_rect_2->getInitTranslateY());
+}
+
+
+
+
+
+
 
 
 

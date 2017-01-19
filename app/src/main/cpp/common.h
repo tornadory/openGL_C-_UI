@@ -7,6 +7,7 @@
 #include <array>
 #include <condition_variable>
 #include <list>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <random>

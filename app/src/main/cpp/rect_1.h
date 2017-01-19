@@ -4,6 +4,7 @@
 #pragma  once
 
 #include "render_context.h"
+#include "touch_listener.h"
 
 struct Rect
 {
@@ -20,6 +21,7 @@ public:
     void setWidth(float i_width)noexcept ;
     void setHeight(float i_height)noexcept ;
     void setInitVertex(float i_x,float i_y)noexcept;
+    void setInitTranslate(float i_x,float i_y)noexcept ;
     void setCenter(float i_x,float i_y)noexcept ;
     void setColor(array<float,4> i_color)noexcept ;
     array<float, 2> transformPosition(float i_x, float i_y) noexcept;
@@ -27,14 +29,17 @@ public:
     float getHeight()noexcept ;
     float getCenterX()noexcept ;
     float getCenterY()noexcept ;
+    float getInitTranslateX()noexcept ;
+    float getInitTranslateY()noexcept ;
+
 
     Rect * onPointerDown(float i_x, float i_y)noexcept ;
     void onPointerUp(float i_x, float i_y) noexcept;
     void onPointerMoved(float i_x, float i_y) noexcept;
 
     void pointerDown(float i_x, float i_y)noexcept ;
-    void pointerUp(float i_x, float i_y) noexcept;
-    void pointerMoved(float i_x, float i_y) noexcept;
+
+    void setTouchListener(TouchListener *i_touchListener)noexcept ;
 
 private:
     float _width;
@@ -45,9 +50,12 @@ private:
     array<float,2> _rotate={1.0f,0.0f};
     array<float,2> _scale={1.0f,1.0f};
     array<float,4> _color={1.0,1.0f,1.0f,1.0f};
+    array<float,2> _initTranslate={0.0f,0.0f};
 
     list<shared_ptr<Rect>> _rectChildren;
+    Matrix3X2 _inverseMatrix;
+
+    TouchListener * _touchListener= nullptr;
 
 };
-
 
