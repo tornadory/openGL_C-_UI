@@ -33,9 +33,9 @@ public:
     float getInitTranslateY()noexcept ;
 
 
-    Rect * onPointerDown(float i_x, float i_y)noexcept ;
-    void onPointerUp(float i_x, float i_y) noexcept;
-    void onPointerMoved(float i_x, float i_y) noexcept;
+    Rect *onPointerDown(int i_point_id, float i_x, float i_y)noexcept ;
+    void onPointerUp(int i_point_id, float i_x, float i_y) noexcept;
+    void onPointerMoved(int i_point_id, float i_x, float i_y) noexcept;
 
     void pointerDown(float i_x, float i_y)noexcept ;
 

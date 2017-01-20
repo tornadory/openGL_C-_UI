@@ -147,7 +147,7 @@ array<float, 2> Rect::transformPosition(float i_x, float i_y) noexcept
 
 }
 
-Rect * Rect::onPointerDown(float i_x, float i_y)noexcept
+Rect * Rect::onPointerDown(int i_point_id, float i_x, float i_y)noexcept
 {
     auto mat = Matrix3X2::translation(-this->_translate[0],-this->_translate[1]).rotate(this->_rotate[0],-this->_rotate[1]).scale(1/this->_scale[0],1/this->_scale[1]);
 
@@ -164,7 +164,7 @@ Rect * Rect::onPointerDown(float i_x, float i_y)noexcept
         for(auto &i : _rectChildren)
         {
 
-            if (i->onPointerDown(p[0], p[1]))
+            if (i->onPointerDown(i_point_id, p[0], p[1]))
             {
                 return i.get();
             }
@@ -176,12 +176,11 @@ Rect * Rect::onPointerDown(float i_x, float i_y)noexcept
         if(_touchListener!= nullptr)
         {
 
-            dbglog("===========touchDown  rect============");
-            this->_touchListener->touchDown(p[0],p[1]);
+            this->_touchListener->touchDown(i_point_id, p[0], p[1]);
+
+            dbglog("=====onPointerDown=%d=%f==%f===%f==",i_point_id,_width,p[0],p[1]);
+
         }
-
-
-        dbglog("onPointerUp=%f==%f===%f==",_width,p[0],p[1]);
 
         return this;
 
@@ -192,28 +191,28 @@ Rect * Rect::onPointerDown(float i_x, float i_y)noexcept
 
 }
 
-void Rect::onPointerUp(float i_x, float i_y)noexcept
+void Rect::onPointerUp(int i_point_id, float i_x, float i_y)noexcept
 {
     auto p=this->_inverseMatrix.transformPoint({i_x, i_y});
 
-    dbglog("onPointerUp=%f==%f===%f==",_width,p[0],p[1]);
-
     if(_touchListener!= nullptr)
     {
-        _touchListener->touchUp(p[0],p[1]);
+        _touchListener->touchUp(i_point_id, p[0], p[1]);
+
+        dbglog("=====onPointerUp=%d=%f==%f===%f==",i_point_id,_width,p[0],p[1]);
     }
 }
 
-void Rect::onPointerMoved(float i_x, float i_y)noexcept
+void Rect::onPointerMoved(int i_point_id, float i_x, float i_y)noexcept
 {
 
     auto p=this->_inverseMatrix.transformPoint({i_x, i_y});
 
-    dbglog("onPointerMoved=%f==%f===%f==",_width,p[0],p[1]);
-
     if(_touchListener!= nullptr)
     {
-        _touchListener->touchMove(p[0],p[1]);
+        _touchListener->touchMove(i_point_id, p[0], p[1]);
+
+        dbglog("=====onPointerMoved=%d=%f==%f===%f==",i_point_id,_width,p[0],p[1]);
     }
 
 

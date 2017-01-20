@@ -6,9 +6,9 @@
 
 struct TouchListener {
 
-    virtual void touchMove(float i_dx, float i_dy)=0;
-    virtual void touchDown(float i_dx, float i_dy)=0;
-    virtual void touchUp(float i_dx, float i_dy)=0;
+    virtual void touchMove(int i_point_id, float i_dx, float i_dy) =0;
+    virtual void touchDown(int i_point_id, float i_dx, float i_dy) =0;
+    virtual void touchUp(int i_point_id, float i_dx, float i_dy) =0;
 
 };
 

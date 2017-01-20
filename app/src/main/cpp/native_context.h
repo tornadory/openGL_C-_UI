@@ -18,16 +18,19 @@ public:
      void onDestorySurface()noexcept ;
 
      void onPointerDown(int i_point_id, float i_x, float i_y) noexcept;
-     void onPointerUp(float i_x, float i_y) noexcept;
+     void onPointerUp(int i_point_id, float i_x, float i_y) noexcept;
      void onPointerMoved(int i_point_id, float i_x, float i_y) noexcept;
 
      void draw()noexcept;
      void initRect()noexcept;
      void addAnimation(shared_ptr<Rect> _rect,shared_ptr<Rect> _rect1,shared_ptr<Rect> _rect2)noexcept ;
 
-     virtual void touchMove(float i_dx, float i_dy) noexcept override final;
-     virtual void touchDown(float i_dx, float i_dy) noexcept override final;
-     virtual void touchUp(float i_dx, float i_dy) noexcept override final;
+     virtual void touchMove(int i_point_id, float i_dx, float i_dy) noexcept override final;
+     virtual void touchDown(int i_point_id, float i_dx, float i_dy) noexcept override final;
+     virtual void touchUp(int i_point_id, float i_dx, float i_dy) noexcept override final;
+
+     void addPoint(int i_pointId,float i_x,float i_y)noexcept ;
+     void removePoint(int i_pointId,float i_x,float i_y)noexcept ;
 
 
 
@@ -52,5 +55,8 @@ private:
 
     int _windowWidth;
     int _windowHeight;
+
+    map<int,array<float,2>> _point_map;
+    map<int,array<float,2>> _move_map;
 
 };

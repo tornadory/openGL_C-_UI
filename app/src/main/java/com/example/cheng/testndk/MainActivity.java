@@ -7,9 +7,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,37 +20,18 @@ public class MainActivity extends AppCompatActivity {
     private long _native;
     private int statusBar;
 
-    private float MIN_PIXEL=10;
+    private ArrayList<Integer> points=new ArrayList<Integer>();
 
-//    private ArrayList<Integer> points=new ArrayList<Integer>();
-
-    class Pointer
+    private void addPoint(int pointId)
     {
-        float x;
-        float y;
-
-        public Pointer(float x, float y)
-        {
-            this.x = x;
-            this.y = y;
-        }
-    }
-    private HashMap<Integer,Pointer> pointsHashMap =new HashMap<Integer,Pointer>();
-
-    private void addPoint(int pointId,float x,float y)
-    {
-//        points.add(pointId);
-
-         pointsHashMap.put(pointId,new Pointer(x,y));
+        points.add(pointId);
     }
 
     private int removePoint(Integer pointId)
     {
-//        points.remove(pointId);
+        points.remove( pointId);
 
-        pointsHashMap.remove(pointId);
-
-        return pointsHashMap.size();
+        return points.size();
     }
 
     @Override
@@ -66,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
                 float x=event.getX(pointId);
                 float y=event.getY(pointId);
 
-                addPoint(pointId,x,y);
+                addPoint(pointId);
                 onPointerDown(pointId,x,y-statusBar,_native);
 
                 break;
@@ -77,50 +56,40 @@ public class MainActivity extends AppCompatActivity {
                 float x2=event.getX(pointId2);
                 float y2=event.getY(pointId2);
 
-                addPoint(pointId2,x2,y2);
+                addPoint(pointId2);
                 onPointerDown(pointId2,x2,y2-statusBar,_native);
 
                 break;
 
             case MotionEvent.ACTION_UP:
 
-//                if(removePoint(event.getPointerId(event.getActionIndex()))==0)
-//                {
-                    onPointerUp(event.getX(event.getActionIndex()),event.getY(event.getActionIndex())-statusBar,_native);
-//                }
+                int pointId3=event.getPointerId(event.getActionIndex());
+
+                removePoint(pointId3);
+                onPointerUp(pointId3, event.getX(event.getActionIndex()), event.getY(event.getActionIndex())-statusBar, _native);
 
                 break;
 
             case MotionEvent.ACTION_POINTER_UP:
 
-                removePoint(event.getPointerId(event.getActionIndex()));
-                onPointerUp(event.getX(event.getActionIndex()),event.getY(event.getActionIndex())-statusBar,_native);
+                int pointId4=event.getPointerId(event.getActionIndex());
+
+                removePoint(pointId4);
+                onPointerUp(pointId4, event.getX(event.getActionIndex()), event.getY(event.getActionIndex())-statusBar, _native);
 
                 break;
 
             case MotionEvent.ACTION_MOVE:
 
-                Iterator it =pointsHashMap.entrySet().iterator();
 
-                while(it.hasNext())
-                {
-                    Map.Entry<Integer,Pointer> entry=(Map.Entry<Integer,Pointer>)it.next();
+               for(int i=0;i<points.size();i++)
+               {
 
-                    int pointId_it=(int)entry.getKey();
-                    Pointer pointer_it=(Pointer)entry.getValue();
-
-
-                    int actionIndex=event.findPointerIndex(pointId_it);
+                    int actionIndex=event.findPointerIndex(points.get(i));
                     float x_now=event.getX(actionIndex);
                     float y_now=event.getY(actionIndex);
 
-                    if(Math.abs(pointer_it.x-x_now)>=MIN_PIXEL||Math.abs(pointer_it.y-y_now)>=MIN_PIXEL)
-                    {
-                        pointer_it.x=x_now;
-                        pointer_it.y=y_now;
-
-                        onPointerMoved(pointId_it,x_now,y_now-statusBar,_native);
-                    }
+                    onPointerMoved(points.get(i),x_now,y_now-statusBar,_native);
                 }
 
                 break;
@@ -212,6 +181,6 @@ public class MainActivity extends AppCompatActivity {
     public native void destorySurface(long _native);
 
     public native void onPointerDown(int i_point_id,float i_x, float i_y,long _native);
-    public native void onPointerUp(float i_x, float i_y,long _native);
+    public native void onPointerUp(int i_point_id, float i_x, float i_y, long _native);
     public native void onPointerMoved(int i_point_id, float i_x, float i_y, long _native);
 }

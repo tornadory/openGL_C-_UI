@@ -181,31 +181,30 @@ void NativeContext::onPointerDown(int i_point_id, float i_x, float i_y) noexcept
 
         if(_rect)
         {
-            Rect * rect=_rect->onPointerDown(i_x, i_y);
+            Rect * rect= _rect->onPointerDown(i_point_id, i_x, i_y);
 
             if(rect)
             {
                 _rectTouch=rect;
             }
 
-//            dbglog("pointDown===%d===%f===%f===",i_point_id,i_x,i_y);
+            dbglog("NC=onPointerDown===%d===%f===%f===",i_point_id,i_x,i_y);
+
         }
 
     });
 }
 
-void NativeContext::onPointerUp(float i_x, float i_y)noexcept
+void NativeContext::onPointerUp(int i_point_id, float i_x, float i_y)noexcept
 {
     _commandQueue.addTask([=]{
 
         if(_rectTouch)
         {
-            _rectTouch->onPointerUp(i_x,i_y);
+            _rectTouch->onPointerUp(i_point_id, i_x, i_y);
         }
 
-        _rectTouch= nullptr;
-
-//        dbglog("onPointerUp=====%f===%f===",i_x,i_y);
+        dbglog("NC=onPointerUp===%d===%f===%f===",i_point_id,i_x,i_y);
     });
 }
 
@@ -215,32 +214,120 @@ void NativeContext::onPointerMoved(int i_point_id, float i_x, float i_y) noexcep
 
         if(_rectTouch)
         {
-            _rectTouch->onPointerMoved(i_x, i_y);
+            _rectTouch->onPointerMoved(i_point_id, i_x, i_y);
 
-//            dbglog("onPointerMoved===%d===%f===%f===",i_point_id,i_x,i_y);
+            dbglog("NC==onPointerMoved===%d===%f===%f===",i_point_id,i_x,i_y);
         }
 
     });
 }
 
-void NativeContext::touchMove(float i_dx, float i_dy) noexcept
+void NativeContext::touchMove(int i_point_id, float i_dx, float i_dy) noexcept
 {
-    dbglog("%f====%f====%f==x==",_down_x,i_dx,i_dx-_down_x);
-    dbglog("%f====%f====%f===y=",_down_y,i_dy,i_dy-_down_y);
 
-    _rect_2.get()->setTranslate(i_dx-_down_x+_rect_2->getInitTranslateX(),i_dy-_down_y+_rect_2->getInitTranslateY());
+    int point_id=-1;
+
+    float distance=0.0f;
+    float distanceInit=0.0f;
+
+    for(auto i=_point_map.cbegin();i!=_point_map.cend();i++)
+    {
+        int a=i->first;
+
+        if(i_point_id==a)
+        {
+            if(abs((i->second)[0]-i_dx)>=5||abs((i->second)[1]-i_dy)>=5)
+            {
+                _move_map.insert({i_point_id,{i_dx,i_dy}}).first->second={i_dx,i_dy};
+                point_id=i_point_id;
+
+                dbglog("touchListenerMove====%d===%f===%f===",i_point_id,i_dx,i_dy);
+            }
+        }
+    }
+
+    if(point_id!=-1)
+    {
+        if(_point_map.size()>=2)
+        {
+            for(auto i=_point_map.begin();i!=_point_map.end();++i)
+            {
+                float init_x=i->second[0];
+                float init_y=i->second[1];
+
+                if(++i!=_point_map.end())
+                {
+                    float minusX=i->second[0]-init_x;
+                    float minusY=i->second[1]-init_y;
+
+                    distanceInit=distanceInit+sqrt(minusX*minusX+minusY*minusY);
+                }
+
+                --i;
+            }
+
+            for(auto i=_move_map.begin();i!=_move_map.end();++i)
+            {
+                float init_x=i->second[0];
+                float init_y=i->second[1];
+
+                if(++i!=_point_map.end())
+                {
+                    float minusX=i->second[0]-init_x;
+                    float minusY=i->second[1]-init_y;
+
+                    distance=distance+sqrt(minusX*minusX+minusY*minusY);
+                }
+
+                --i;
+            }
+
+            _rect_2.get()->setScale(distance/distanceInit,distance/distanceInit);
+        }
+    }
+
+//    _rect_2.get()->setTranslate(i_dx-_down_x+_rect_2->getInitTranslateX(),i_dy-_down_y+_rect_2->getInitTranslateY());
 }
 
-void NativeContext::touchDown(float i_dx, float i_dy) noexcept
+void NativeContext::touchDown(int i_point_id, float i_dx, float i_dy) noexcept
 {
     _down_x=i_dx;
     _down_y=i_dy;
+
+    addPoint(i_point_id,i_dx,i_dy);
+
+    dbglog("touchListenerdown====%d===%f===%f===",i_point_id,i_dx,i_dy);
 }
 
-void NativeContext::touchUp(float i_dx, float i_dy) noexcept
+void NativeContext::touchUp(int i_point_id, float i_dx, float i_dy) noexcept
 {
-    _rect_2.get()->setInitTranslate(i_dx-_down_x+_rect_2->getInitTranslateX(),i_dy-_down_y+_rect_2->getInitTranslateY());
+    removePoint(i_point_id,i_dx,i_dy);
+
+    if(_point_map.size()==0)
+    {
+        _rectTouch= nullptr;
+    }
+
+    dbglog("touchListenerup====%d===%f===%f===",i_point_id,i_dx,i_dy);
+
+//    _rect_2.get()->setInitTranslate(i_dx-_down_x+_rect_2->getInitTranslateX(),i_dy-_down_y+_rect_2->getInitTranslateY());
 }
+
+void NativeContext::addPoint(int i_pointId, float i_x, float i_y)noexcept
+{
+    _point_map.insert({i_pointId,{i_x,i_y}});
+    _move_map.insert({i_pointId,{i_x,i_y}});
+}
+
+void NativeContext::removePoint(int i_pointId, float i_x, float i_y)noexcept
+{
+    _point_map.erase(i_pointId);
+    _move_map.erase(i_pointId);
+}
+
+
+
+
 
 
 
