@@ -82,11 +82,11 @@ void NativeContext::onResumeAcitity()noexcept
 
     double t=getTime();
     uint64_t r=_commandQueue.addTask([this,t]
-                          {
-                              _timerOur.setResumeTime(t);
-                              _isPause= false;
+                                     {
+                                         _timerOur.setResumeTime(t);
+                                         _isPause= false;
 
-                          });
+                                     });
 
     _signal.notifyOne();
 
@@ -119,8 +119,8 @@ void NativeContext::draw()noexcept {
 
 void NativeContext::initRect() noexcept
 {
-    _rect->setWidth(_windowWidth/1.5);
-    _rect->setHeight(_windowHeight/2);
+    _rect->setWidth(_windowWidth/1.1);
+    _rect->setHeight(_windowHeight/1.1);
     _rect->setCenter(0.5f,0.5f);
     _rect->setInitVertex(20.0f,30.0f);
     _rect->setColor({1.0f,1.0f,1.0f,1.0f});
@@ -181,15 +181,41 @@ void NativeContext::onPointerDown(int i_point_id, float i_x, float i_y) noexcept
 
         if(_rect)
         {
-            Rect * rect= _rect->onPointerDown(i_point_id, i_x, i_y);
+            addPoint(i_point_id,i_x,i_y);
 
-            if(rect)
+
+
+            if(_rectTouch)
             {
-                _rectTouch=rect;
+                _rectTouch->onPointerDown(i_point_id,i_x,i_y);
+            }
+            else
+            {
+                Rect * rect= _rect->onPointerDown(i_point_id, i_x, i_y);
+
+                if(rect)
+                {
+                    _rectTouch=rect;
+                }
             }
 
             dbglog("NC=onPointerDown===%d===%f===%f===",i_point_id,i_x,i_y);
+        }
 
+    });
+}
+
+void NativeContext::onPointerMoved(int i_point_id, float i_x, float i_y) noexcept
+{
+    _commandQueue.addTask([=]{
+
+        if(_rectTouch)
+        {
+            dbglog("NC==onPointerMoved===%d===%f===%f===",i_point_id,i_x,i_y);
+
+            _point_map.find(i_point_id)->second={i_x,i_y};
+
+            _rectTouch->onPointerMoved(i_point_id, i_x, i_y);
         }
 
     });
@@ -202,128 +228,122 @@ void NativeContext::onPointerUp(int i_point_id, float i_x, float i_y)noexcept
         if(_rectTouch)
         {
             _rectTouch->onPointerUp(i_point_id, i_x, i_y);
+
+            if(_point_map.size()==0)
+            {
+                _rectTouch= nullptr;
+            }
+
+            removePoint(i_point_id,i_x,i_y);
+
         }
 
         dbglog("NC=onPointerUp===%d===%f===%f===",i_point_id,i_x,i_y);
     });
 }
 
-void NativeContext::onPointerMoved(int i_point_id, float i_x, float i_y) noexcept
+
+void NativeContext::touchDown(int i_point_id, float i_dx, float i_dy) noexcept
 {
-    _commandQueue.addTask([=]{
+    if(_point_map.size()==1)
+    {
+        _point_id_translate=i_point_id;
+        _down_x=i_dx;
+        _down_y=i_dy;
 
-        if(_rectTouch)
-        {
-            _rectTouch->onPointerMoved(i_point_id, i_x, i_y);
+    }else if(_point_map.size()==2)
+    {
+        _distance=getCurrentDistance();
+    }
 
-            dbglog("NC==onPointerMoved===%d===%f===%f===",i_point_id,i_x,i_y);
-        }
-
-    });
+    dbglog("touchListenerdown====%d===%f===%f===",i_point_id,i_dx,i_dy);
 }
 
 void NativeContext::touchMove(int i_point_id, float i_dx, float i_dy) noexcept
 {
 
-    int point_id=-1;
-
-    float distance=0.0f;
-    float distanceInit=0.0f;
-
-    for(auto i=_point_map.cbegin();i!=_point_map.cend();i++)
+    if(_point_map.size()>=2)
     {
-        int a=i->first;
+        float scale=_scaleRadio*getCurrentDistance()/_distance;
 
-        if(i_point_id==a)
-        {
-            if(abs((i->second)[0]-i_dx)>=5||abs((i->second)[1]-i_dy)>=5)
-            {
-                _move_map.insert({i_point_id,{i_dx,i_dy}}).first->second={i_dx,i_dy};
-                point_id=i_point_id;
-
-                dbglog("touchListenerMove====%d===%f===%f===",i_point_id,i_dx,i_dy);
-            }
-        }
+        _rect_2.get()->setScale(scale,scale);
     }
 
-    if(point_id!=-1)
+    if(i_point_id==_point_id_translate)
     {
-        if(_point_map.size()>=2)
-        {
-            for(auto i=_point_map.begin();i!=_point_map.end();++i)
-            {
-                float init_x=i->second[0];
-                float init_y=i->second[1];
-
-                if(++i!=_point_map.end())
-                {
-                    float minusX=i->second[0]-init_x;
-                    float minusY=i->second[1]-init_y;
-
-                    distanceInit=distanceInit+sqrt(minusX*minusX+minusY*minusY);
-                }
-
-                --i;
-            }
-
-            for(auto i=_move_map.begin();i!=_move_map.end();++i)
-            {
-                float init_x=i->second[0];
-                float init_y=i->second[1];
-
-                if(++i!=_point_map.end())
-                {
-                    float minusX=i->second[0]-init_x;
-                    float minusY=i->second[1]-init_y;
-
-                    distance=distance+sqrt(minusX*minusX+minusY*minusY);
-                }
-
-                --i;
-            }
-
-            _rect_2.get()->setScale(distance/distanceInit,distance/distanceInit);
-        }
+        _rect_2.get()->setTranslate(i_dx-_down_x+_rect_2->getInitTranslateX(),i_dy-_down_y+_rect_2->getInitTranslateY());
     }
-
-//    _rect_2.get()->setTranslate(i_dx-_down_x+_rect_2->getInitTranslateX(),i_dy-_down_y+_rect_2->getInitTranslateY());
-}
-
-void NativeContext::touchDown(int i_point_id, float i_dx, float i_dy) noexcept
-{
-    _down_x=i_dx;
-    _down_y=i_dy;
-
-    addPoint(i_point_id,i_dx,i_dy);
-
-    dbglog("touchListenerdown====%d===%f===%f===",i_point_id,i_dx,i_dy);
 }
 
 void NativeContext::touchUp(int i_point_id, float i_dx, float i_dy) noexcept
 {
-    removePoint(i_point_id,i_dx,i_dy);
-
-    if(_point_map.size()==0)
-    {
-        _rectTouch= nullptr;
-    }
-
     dbglog("touchListenerup====%d===%f===%f===",i_point_id,i_dx,i_dy);
 
-//    _rect_2.get()->setInitTranslate(i_dx-_down_x+_rect_2->getInitTranslateX(),i_dy-_down_y+_rect_2->getInitTranslateY());
+    if(_point_map.size()==2)
+    {
+        //处理缩放
+        _scaleRadio=_scaleRadio*getCurrentDistance()/_distance;
+        _distance=0.0f;
+
+        //处理位移
+        if(i_point_id==_point_id_translate)
+        {
+            _rect_2.get()->setInitTranslate(i_dx-_down_x+_rect_2->getInitTranslateX(),i_dy-_down_y+_rect_2->getInitTranslateY());
+
+            for(auto i=_point_map.begin();i!=_point_map.end();++i)
+            {
+                if(i_point_id!=_point_id_translate)
+                {
+                    _down_x=i->second[0];
+                    _down_y=i->second[1];
+
+                    _point_id_translate=i->first;
+                }
+            }
+        }
+    }else if(_point_map.size()==1&&i_point_id==_point_id_translate) //处理位移
+    {
+        _rect_2.get()->setInitTranslate(i_dx-_down_x+_rect_2->getInitTranslateX(),i_dy-_down_y+_rect_2->getInitTranslateY());
+        _point_id_translate=-1;
+    }
 }
 
 void NativeContext::addPoint(int i_pointId, float i_x, float i_y)noexcept
 {
     _point_map.insert({i_pointId,{i_x,i_y}});
-    _move_map.insert({i_pointId,{i_x,i_y}});
 }
 
 void NativeContext::removePoint(int i_pointId, float i_x, float i_y)noexcept
 {
     _point_map.erase(i_pointId);
-    _move_map.erase(i_pointId);
 }
+
+float NativeContext::getCurrentDistance() noexcept
+{
+    float newDistance=0.0f;
+
+    if(_point_map.size()==2)
+    {
+        for(auto i=_point_map.begin();i!=_point_map.end();++i)
+        {
+            float init_x=i->second[0];
+            float init_y=i->second[1];
+
+            if(++i!=_point_map.end())
+            {
+                float minusX=i->second[0]-init_x;
+                float minusY=i->second[1]-init_y;
+
+                newDistance=sqrt(minusX*minusX+minusY*minusY);
+            }
+
+            --i;
+        }
+    }
+    return newDistance;
+}
+
+
 
 
 

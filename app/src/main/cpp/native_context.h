@@ -31,6 +31,7 @@ public:
 
      void addPoint(int i_pointId,float i_x,float i_y)noexcept ;
      void removePoint(int i_pointId,float i_x,float i_y)noexcept ;
+     float getCurrentDistance()noexcept ;
 
 
 
@@ -45,9 +46,6 @@ private:
     shared_ptr<Rect> _rect_1=make_shared<Rect>();
     shared_ptr<Rect> _rect_2=make_shared<Rect>();
 
-    float _down_x=0;
-    float _down_y=0;
-
     AnimationManager _animationManager;
     TimerOur _timerOur;
 
@@ -57,6 +55,11 @@ private:
     int _windowHeight;
 
     map<int,array<float,2>> _point_map;
-    map<int,array<float,2>> _move_map;
+    float _scaleRadio=1.0f;
+    float _distance=0.0f;
+
+    int _point_id_translate=-1.0f;
+    float _down_x=0;
+    float _down_y=0;
 
 };
