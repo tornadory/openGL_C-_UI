@@ -46,7 +46,9 @@ public class MainActivity extends AppCompatActivity {
                 float y=event.getY(pointId);
 
                 addPoint(pointId);
-                onPointerDown(pointId,x,y-statusBar,_native);
+
+                setPoint(pointId,x,y,_native);
+                onPointerDown(pointId, _native);
 
                 break;
 
@@ -57,7 +59,9 @@ public class MainActivity extends AppCompatActivity {
                 float y2=event.getY(pointId2);
 
                 addPoint(pointId2);
-                onPointerDown(pointId2,x2,y2-statusBar,_native);
+
+                setPoint(pointId2,x2,y2,_native);
+                onPointerDown(pointId2, _native);
 
                 break;
 
@@ -66,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
                 int pointId3=event.getPointerId(event.getActionIndex());
 
                 removePoint(pointId3);
-                onPointerUp(pointId3, event.getX(event.getActionIndex()), event.getY(event.getActionIndex())-statusBar, _native);
+                onPointerUp(pointId3, _native);
 
                 break;
 
@@ -75,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
                 int pointId4=event.getPointerId(event.getActionIndex());
 
                 removePoint(pointId4);
-                onPointerUp(pointId4, event.getX(event.getActionIndex()), event.getY(event.getActionIndex())-statusBar, _native);
+                onPointerUp(pointId4, _native);
 
                 break;
 
@@ -89,7 +93,9 @@ public class MainActivity extends AppCompatActivity {
                     float x_now=event.getX(actionIndex);
                     float y_now=event.getY(actionIndex);
 
-                    onPointerMoved(points.get(i),x_now,y_now-statusBar,_native);
+                    setPoint(points.get(i),x_now,y_now,_native);
+
+                    onPointerMoved(_native);
                 }
 
                 break;
@@ -180,7 +186,8 @@ public class MainActivity extends AppCompatActivity {
     public native void onPauseActivity(long _native);
     public native void destorySurface(long _native);
 
-    public native void onPointerDown(int i_point_id,float i_x, float i_y,long _native);
-    public native void onPointerUp(int i_point_id, float i_x, float i_y, long _native);
-    public native void onPointerMoved(int i_point_id, float i_x, float i_y, long _native);
+    public native void onPointerDown(int i_point_id, long _native);
+    public native void onPointerUp(int i_point_id, long _native);
+    public native void onPointerMoved(long _native);
+    public native void setPoint(int i_point_id,float i_x,float i_y,long _native);
 }

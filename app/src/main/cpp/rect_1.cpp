@@ -147,7 +147,7 @@ array<float, 2> Rect::transformPosition(float i_x, float i_y) noexcept
 
 }
 
-Rect * Rect::onPointerDown(int i_point_id, float i_x, float i_y)noexcept
+Rect * Rect::onPointerDown(map<int,array<float,4>> &i_point_map, int i_point_id, float i_x, float i_y)noexcept
 {
     auto mat = Matrix3X2::translation(-this->_translate[0],-this->_translate[1]).rotate(this->_rotate[0],-this->_rotate[1]).scale(1/this->_scale[0],1/this->_scale[1]);
 
@@ -164,7 +164,7 @@ Rect * Rect::onPointerDown(int i_point_id, float i_x, float i_y)noexcept
         for(auto &i : _rectChildren)
         {
 
-            if (i->onPointerDown(i_point_id, i_x, i_y))
+            if (i->onPointerDown(i_point_map, i_point_id, x, y))
             {
                 return i.get();
             }
@@ -175,10 +175,13 @@ Rect * Rect::onPointerDown(int i_point_id, float i_x, float i_y)noexcept
 
         if(_touchListener!= nullptr)
         {
-
-            this->_touchListener->touchDown(i_point_id, i_x, i_y);
-
             dbglog("=====onPointerDown=%d=%f==%f===%f==",i_point_id,_width,p[0],p[1]);
+
+            array<float,4>& a=i_point_map.find(i_point_id)->second;
+            a[2]=p[0];
+            a[3]=p[1];
+
+            this->_touchListener->touchDown(i_point_id);
 
         }
 
@@ -191,39 +194,40 @@ Rect * Rect::onPointerDown(int i_point_id, float i_x, float i_y)noexcept
 
 }
 
-void Rect::onPointerUp(int i_point_id, float i_x, float i_y)noexcept
+void Rect::onPointerUp(int i_point_id)noexcept
 {
-    auto p=this->_inverseMatrix.transformPoint({i_x, i_y});
+//    auto p=this->_inverseMatrix.transformPoint({i_x, i_y});
 
     if(_touchListener!= nullptr)
     {
-        _touchListener->touchUp(i_point_id, i_x,i_y);
+        _touchListener->touchUp(i_point_id);
 
-        dbglog("=====onPointerUp=%d=%f==%f===%f==",i_point_id,_width,p[0],p[1]);
+        dbglog("=====onPointerUp=%d=%f==",i_point_id,_width);
     }
 }
 
-void Rect::onPointerMoved(int i_point_id, float i_x, float i_y)noexcept
+void Rect::onPointerMoved(map<int,array<float,4>> &i_point_map)noexcept
 {
-
-    auto p=this->_inverseMatrix.transformPoint({i_x, i_y});
 
     if(_touchListener!= nullptr)
     {
-        _touchListener->touchMove(i_point_id,i_x, i_y);
 
-        dbglog("=====onPointerMoved=%d=%f==%f===%f==",i_point_id,_width,p[0],p[1]);
+        for(auto i=i_point_map.begin();i!=i_point_map.end();++i)
+        {
+            auto p=this->_inverseMatrix.transformPoint({i->second[0], i->second[1]});
+
+            i->second[2]=p[0];
+            i->second[3]=p[1];
+
+            dbglog("=====onPointerMoved=%d=%f==%f===%f==",i->first,_width,p[0],p[1]);
+        }
+
+        _touchListener->touchMove();
+
     }
 
 
 }
-
-void Rect::pointerDown(float i_x, float i_y)noexcept
-{
-    setColor({0.5f,0.5f,0.5f,1.0f});
-}
-
-
 
 
 

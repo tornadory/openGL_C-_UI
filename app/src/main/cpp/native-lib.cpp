@@ -2,34 +2,35 @@
 #include "native_context.h"
 
 
-
-
 extern "C"
 void
-Java_com_example_cheng_testndk_MainActivity_onPointerDown(JNIEnv *env, jobject instance,
-                                                          jint i_point_id, jfloat i_x, jfloat i_y,
-                                                          jlong _native) {
+Java_com_example_cheng_testndk_MainActivity_setPoint(JNIEnv *env, jobject instance, jint i_point_id,
+                                                     jfloat i_x, jfloat i_y, jlong _native) {
 
-    ((NativeContext *) _native)->onPointerDown(i_point_id,i_x,i_y);
+    ((NativeContext *) _native)->setPoint(i_point_id,i_x,i_y);
 
 }
 
 extern "C"
 void
-Java_com_example_cheng_testndk_MainActivity_onPointerUp(JNIEnv *env, jobject instance,
-                                                        jint i_point_id, jfloat i_x, jfloat i_y,
-                                                        jlong _native) {
+Java_com_example_cheng_testndk_MainActivity_onPointerDown(JNIEnv *env, jobject instance, jint i_point_id,jlong _native) {
 
-    ((NativeContext *) _native)->onPointerUp(i_point_id, i_x, i_y);
+    ((NativeContext *) _native)->onPointerDown(i_point_id);
 
 }
 
 extern "C"
 void
-Java_com_example_cheng_testndk_MainActivity_onPointerMoved(JNIEnv *env, jobject instance,
-                                                           jint i_point_id, jfloat i_x, jfloat i_y,
-                                                           jlong _native) {
-    ((NativeContext *) _native)->onPointerMoved(i_point_id, i_x, i_y);
+Java_com_example_cheng_testndk_MainActivity_onPointerUp(JNIEnv *env, jobject instance,jint i_point_id,long _native) {
+
+    ((NativeContext *) _native)->onPointerUp(i_point_id);
+
+}
+
+extern "C"
+void
+Java_com_example_cheng_testndk_MainActivity_onPointerMoved(JNIEnv *env, jobject instance, jlong _native) {
+    ((NativeContext *) _native)->onPointerMoved();
 
 }
 

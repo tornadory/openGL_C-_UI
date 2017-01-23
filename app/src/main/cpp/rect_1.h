@@ -33,11 +33,9 @@ public:
     float getInitTranslateY()noexcept ;
 
 
-    Rect *onPointerDown(int i_point_id, float i_x, float i_y)noexcept ;
-    void onPointerUp(int i_point_id, float i_x, float i_y) noexcept;
-    void onPointerMoved(int i_point_id, float i_x, float i_y) noexcept;
-
-    void pointerDown(float i_x, float i_y)noexcept ;
+    Rect *onPointerDown(map<int,array<float,4>> &i_point_map, int i_point_id, float i_x, float i_y)noexcept ;
+    void onPointerUp(int i_point_id) noexcept;
+    void onPointerMoved(map<int,array<float,4>> &i_point_map) noexcept;
 
     void setTouchListener(TouchListener *i_touchListener)noexcept ;
 

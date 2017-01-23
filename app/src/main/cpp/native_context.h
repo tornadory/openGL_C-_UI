@@ -17,20 +17,21 @@ public:
      void onResumeAcitity()noexcept ;
      void onDestorySurface()noexcept ;
 
-     void onPointerDown(int i_point_id, float i_x, float i_y) noexcept;
-     void onPointerUp(int i_point_id, float i_x, float i_y) noexcept;
-     void onPointerMoved(int i_point_id, float i_x, float i_y) noexcept;
+     void onPointerDown(int i_point_id) noexcept;
+     void onPointerUp(int i_point_id) noexcept;
+     void onPointerMoved() noexcept;
+     void setPoint(int i_point_id,float i_x,float i_y)noexcept ;
 
      void draw()noexcept;
      void initRect()noexcept;
      void addAnimation(shared_ptr<Rect> _rect,shared_ptr<Rect> _rect1,shared_ptr<Rect> _rect2)noexcept ;
 
-     virtual void touchMove(int i_point_id, float i_dx, float i_dy) noexcept override final;
-     virtual void touchDown(int i_point_id, float i_dx, float i_dy) noexcept override final;
-     virtual void touchUp(int i_point_id, float i_dx, float i_dy) noexcept override final;
+     virtual void touchMove() noexcept override final;
+     virtual void touchDown(int i_point_id) noexcept override final;
+     virtual void touchUp(int i_point_id) noexcept override final;
 
      void addPoint(int i_pointId,float i_x,float i_y)noexcept ;
-     void removePoint(int i_pointId,float i_x,float i_y)noexcept ;
+     void removePoint(int i_pointId)noexcept ;
      float getCurrentDistance()noexcept ;
 
 
@@ -54,11 +55,15 @@ private:
     int _windowWidth;
     int _windowHeight;
 
-    map<int,array<float,2>> _point_map;
+    map<int,array<float,4>> _point_map;
+
+    int _status=-1;
+    int _pen_handler_id=-1;
+    array<float,2> _scale_handler_ids={-1,-1};
+
     float _scaleRadio=1.0f;
     float _distance=0.0f;
 
-    int _point_id_translate=-1.0f;
     float _down_x=0;
     float _down_y=0;
 
