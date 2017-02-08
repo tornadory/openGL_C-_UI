@@ -164,7 +164,7 @@ Rect * Rect::onPointerDown(map<int,array<float,4>> &i_point_map, int i_point_id,
         for(auto &i : _rectChildren)
         {
 
-            if (i->onPointerDown(i_point_map, i_point_id, x, y))
+            if (i->onPointerDown(i_point_map, i_point_id, p[0], p[1]))
             {
                 return i.get();
             }

@@ -33,7 +33,11 @@ public:
      void addPoint(int i_pointId,float i_x,float i_y)noexcept ;
      void removePoint(int i_pointId)noexcept ;
      float getCurrentDistance()noexcept ;
-
+     array<float,4> getcurrentPoints()noexcept ;
+     float sinAB(float i_cosa,float i_sina,float i_cosb,float i_sinb)noexcept ;
+     float cosAB(float i_cosa,float i_sina,float i_cosb,float i_sinb)noexcept ;
+     float getCosa(array<float,4> i_start,array<float,4> i_end)noexcept ;
+     float getSina(array<float,4> i_start,array<float,4> i_end)noexcept ;
 
 
 private:
@@ -66,5 +70,10 @@ private:
 
     float _down_x=0;
     float _down_y=0;
+
+    float _cosA=1;
+    float _sinA=0;
+
+    array<float,4> _startPoints;
 
 };

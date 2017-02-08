@@ -212,7 +212,6 @@ void NativeContext::onPointerDown(int i_point_id) noexcept
                 }
             }
 
-            dbglog("NC=onPointerDown===%d===%f===%f===",i_point_id, p[0], p[1]);
         }
 
     });
@@ -224,10 +223,6 @@ void NativeContext::onPointerMoved() noexcept
 
         if(_rectTouch)
         {
-//            dbglog("NC==onPointerMoved===%d===%f===%f===",i_point_id,i_x,i_y);
-//
-//            _point_map.find(i_point_id)->second={i_x,i_y};
-
             _rectTouch->onPointerMoved(_point_map);
         }
 
@@ -269,15 +264,14 @@ void NativeContext::onPointerUp(int i_point_id)noexcept
                     break;
             }
 
+            removePoint(i_point_id);
+
             if(_point_map.size()==0)
             {
                 _rectTouch= nullptr;
             }
 
-            removePoint(i_point_id);
         }
-
-        dbglog("NC=onPointerUp===%d===%f===%f===",i_point_id);
     });
 }
 
@@ -293,10 +287,17 @@ void NativeContext::touchDown(int i_point_id) noexcept
 
     }else if(_status==2)
     {
-        _distance=getCurrentDistance();
-    }
 
-    dbglog("touchListenerdown====%d===%f===%f===",i_point_id,p[2],p[3]);
+        auto p=_point_map.find(_scale_handler_ids[0])->second;
+        auto p2=_point_map.find(_scale_handler_ids[1])->second;
+
+        _startPoints={p[2],p[3],p2[2],p2[3]};
+
+        _distance=getCurrentDistance();
+
+        _rect_2.get()->setInitTranslate(p[2]-_down_x+_rect_2->getInitTranslateX(),p[3]-_down_y+_rect_2->getInitTranslateY());
+
+    }
 }
 
 void NativeContext::touchMove() noexcept
@@ -305,8 +306,14 @@ void NativeContext::touchMove() noexcept
     if(_status==2)
     {
         float scale=_scaleRadio*getCurrentDistance()/_distance;
-
         _rect_2.get()->setScale(scale,scale);
+
+        array<float,4> arr= getcurrentPoints();
+        float cosb=getCosa(_startPoints,arr);
+        float sinb=getSina(_startPoints,arr);
+        float cos=cosAB(_cosA,_sinA,cosb,sinb);
+        float sin=sinAB(_cosA,_sinA,cosb,sinb);
+        _rect_2.get()->setRotate(cos,sin);
     }
     else if(_status==1)
     {
@@ -320,14 +327,22 @@ void NativeContext::touchUp(int i_point_id) noexcept
 {
 
     auto p=_point_map.find(i_point_id)->second;
-    dbglog("touchListenerup====%d===%f===%f===",i_point_id,p[2],p[3]);
 
     if(_status==2)
     {
         //处理缩放
         _scaleRadio=_scaleRadio*getCurrentDistance()/_distance;
-        _distance=0.0f;
+//        _distance=0.0f;
 
+        //处理rotate
+        array<float,4> arr= getcurrentPoints();
+        float cosb=getCosa(_startPoints,arr);
+        float sinb=getSina(_startPoints,arr);
+        float cosa=cosAB(_cosA,_sinA,cosb,sinb);
+        float sina=sinAB(_cosA,_sinA,cosb,sinb);
+
+        _cosA = cosa;
+        _sinA = sina;
 
         if(_scale_handler_ids[0]==i_point_id)
         {
@@ -336,12 +351,16 @@ void NativeContext::touchUp(int i_point_id) noexcept
             _down_x=p[2];
             _down_y=p[3];
 
+            _pen_handler_id=_point_map.find(_scale_handler_ids[1])->first;
+
         } else
         {
             auto p=_point_map.find(_scale_handler_ids[0])->second;
 
             _down_x=p[2];
             _down_y=p[3];
+
+            _pen_handler_id=_point_map.find(_scale_handler_ids[1])->first;
         }
 
     }else if(_status==1)
@@ -366,10 +385,10 @@ float NativeContext::getCurrentDistance() noexcept
     auto p=_point_map.find(_scale_handler_ids[0])->second;
     auto p2=_point_map.find(_scale_handler_ids[1])->second;
 
-    float minusX=p[2]- p2[2];
-    float minusY=p[3]- p2[3];
+    float x=p[2]- p2[2];
+    float y=p[3]- p2[3];
 
-    return sqrt(minusX*minusX+minusY*minusY);
+    return sqrt(x*x+y*y);
 
 }
 
@@ -388,31 +407,49 @@ void NativeContext::setPoint(int i_point_id, float i_x, float i_y)noexcept
         a[0]=i_x;
         a[1]=i_y;
     }
-
-
 }
 
+array<float, 4> NativeContext::getcurrentPoints()noexcept
+{
+    auto p=_point_map.find(_scale_handler_ids[0])->second;
+    auto p2=_point_map.find(_scale_handler_ids[1])->second;
 
+    return { p[2],p[3],p2[2],p2[3] };
+}
 
+//sin(a+b)=sin(a)•cos(b)+cos(a)•sin(b)
+float NativeContext::sinAB(float i_cosa,float i_sina,float i_cosb,float i_sinb)noexcept
+{
+    return i_sina*i_cosb+i_cosa*i_sinb;
+}
 
+//cos(a+b)=cosacosb-sinasinb
+float NativeContext::cosAB(float i_cosa,float i_sina,float i_cosb,float i_sinb)noexcept
+{
+    return  i_cosa*i_cosb-i_sina*i_sinb;
+}
 
+//cos=a*b/[|a|*|b|]=(x1x2+y1y2)/[√[x1^2+y1^2]*√[x2^2+y2^2]]
+float NativeContext::getCosa(array<float, 4> i_start, array<float, 4> i_end) noexcept
+{
+    float x1= i_start[2]-i_start[0];
+    float y1= i_start[3]-i_start[1];
 
+    float x2= i_end[2]-i_end[0];
+    float y2= i_end[3]-i_end[1];
 
+    return (x1*x2+y1*y2)/(sqrt(x1*x1+y1*y1)*sqrt(x2*x2+y2*y2));
+}
 
+//sin=()/(x1y2-x2y1)/[√[x1^2+y1^2]*√[x2^2+y2^2]
+float NativeContext::getSina(array<float, 4> i_start, array<float, 4> i_end) noexcept
+{
+    float x1= i_start[2]-i_start[0];
+    float y1= i_start[3]-i_start[1];
 
+    float x2= i_end[2]-i_end[0];
+    float y2= i_end[3]-i_end[1];
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return (x1*y2-x2*y1)/(sqrt(x1*x1+y1*y1)*sqrt(x2*x2+y2*y2));
+}
 
