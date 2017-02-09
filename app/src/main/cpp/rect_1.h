@@ -21,7 +21,6 @@ public:
     void setWidth(float i_width)noexcept ;
     void setHeight(float i_height)noexcept ;
     void setInitVertex(float i_x,float i_y)noexcept;
-    void setInitTranslate(float i_x,float i_y)noexcept ;
     void setCenter(float i_x,float i_y)noexcept ;
     void setColor(array<float,4> i_color)noexcept ;
     array<float, 2> transformPosition(float i_x, float i_y) noexcept;
@@ -29,8 +28,12 @@ public:
     float getHeight()noexcept ;
     float getCenterX()noexcept ;
     float getCenterY()noexcept ;
-    float getInitTranslateX()noexcept ;
-    float getInitTranslateY()noexcept ;
+    float getTranslateX()noexcept ;
+    float getTranslateY()noexcept ;
+    float getScaleX()noexcept ;
+    float getScaleY()noexcept ;
+    float getCos()noexcept ;
+    float getSin()noexcept ;
 
 
     Rect *onPointerDown(map<int,array<float,4>> &i_point_map, int i_point_id, float i_x, float i_y)noexcept ;
@@ -48,7 +51,6 @@ private:
     array<float,2> _rotate={1.0f,0.0f};
     array<float,2> _scale={1.0f,1.0f};
     array<float,4> _color={1.0,1.0f,1.0f,1.0f};
-    array<float,2> _initTranslate={0.0f,0.0f};
 
     list<shared_ptr<Rect>> _rectChildren;
     Matrix3X2 _inverseMatrix;

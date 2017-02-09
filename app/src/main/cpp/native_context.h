@@ -68,8 +68,10 @@ private:
     float _scaleRadio=1.0f;
     float _distance=0.0f;
 
-    float _down_x=0;
-    float _down_y=0;
+    float _down_x=0.0f;
+    float _down_y=0.0f;
+    float _offset_x=0.0f;
+    float _offset_y=0.0f;
 
     float _cosA=1;
     float _sinA=0;

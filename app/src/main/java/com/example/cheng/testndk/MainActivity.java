@@ -93,10 +93,10 @@ public class MainActivity extends AppCompatActivity {
                     float x_now=event.getX(actionIndex);
                     float y_now=event.getY(actionIndex);
 
-                    setPoint(points.get(i),x_now,y_now,_native);
+                   setPoint(points.get(i),x_now,y_now,_native);
 
-                    onPointerMoved(_native);
-                }
+               }
+                onPointerMoved(_native);
 
                 break;
         }

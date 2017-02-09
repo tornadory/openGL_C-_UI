@@ -28,8 +28,6 @@ void Rect::setInitVertex(float i_x, float i_y) noexcept
 {
     _translate[0]=i_x+_center[0]*_width;
     _translate[1]=i_y+_center[1]*_height;
-
-    setInitTranslate(_translate[0],_translate[1]);
 }
 
 void Rect::setWidth(float i_width) noexcept
@@ -78,20 +76,34 @@ void Rect::setTouchListener(TouchListener *i_touchListener) noexcept
     _touchListener=i_touchListener;
 }
 
-float Rect::getInitTranslateX() noexcept
+float Rect::getTranslateX() noexcept
 {
-    return _initTranslate[0];
+    return _translate[0];
 }
 
-float Rect::getInitTranslateY() noexcept
+float Rect::getTranslateY() noexcept
 {
-    return _initTranslate[1];
+    return _translate[1];
 }
 
-void Rect::setInitTranslate(float i_x, float i_y)noexcept
+float Rect::getScaleX() noexcept
 {
-    _initTranslate[0]=i_x;
-    _initTranslate[1]=i_y;
+    return _scale[0];
+}
+
+float Rect::getScaleY() noexcept
+{
+    return _scale[1];
+}
+
+float Rect::getCos() noexcept
+{
+    return _rotate[0];
+}
+
+float Rect::getSin()noexcept
+{
+    return _rotate[1];
 }
 
 void Rect::addRectChild(shared_ptr<Rect> i_rect)noexcept
@@ -228,6 +240,16 @@ void Rect::onPointerMoved(map<int,array<float,4>> &i_point_map)noexcept
 
 
 }
+
+
+
+
+
+
+
+
+
+
 
 
 

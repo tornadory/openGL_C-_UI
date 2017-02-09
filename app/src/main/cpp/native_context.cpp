@@ -142,7 +142,7 @@ void NativeContext::initRect() noexcept
     _rect->addRectChild(_rect_1);
     _rect->addRectChild(_rect_2);
 
-    _rect.get()->setTouchListener(this);
+    _rect->setTouchListener(this);
 }
 
 void NativeContext::addAnimation(shared_ptr<Rect> _rect,shared_ptr<Rect> _rect1,shared_ptr<Rect> _rect2) noexcept
@@ -151,7 +151,7 @@ void NativeContext::addAnimation(shared_ptr<Rect> _rect,shared_ptr<Rect> _rect1,
     double time=TimerOur().getCurrentTime();
     TranslateAnimation t(_rect,10.0,time,50.0f,50.0f,90.0f,90.0f);
     ScaleAnimation s(_rect,10.0,time,1.0f,0.5f);
-    RotateAnimaton r(_rect,10.0,time,0.0f,1.0f);
+    RotateAnimaton r(_rect,10.0,time,0.0f,0.8f);
 
     TranslateAnimation t1(_rect,10.0,time,50.0f,50.0f,90.0f,90.0f);
     ScaleAnimation s1(_rect1,10.0,time,1.0f,0.5f);
@@ -159,44 +159,28 @@ void NativeContext::addAnimation(shared_ptr<Rect> _rect,shared_ptr<Rect> _rect1,
 
     TranslateAnimation t2(_rect,10.0,time,50.0f,50.0f,90.0f,90.0f);
     ScaleAnimation s2(_rect2,10.0,time,1.0f,0.5f);
-    RotateAnimaton r2(_rect2,10.0,time,0.0f,1.0f);
+    RotateAnimaton r2(_rect2,10.0,time,0.0f,0.6f);
 
 
-//    _animationManager.addAnimation(make_shared<TranslateAnimation>(t));
-//    _animationManager.addAnimation(make_shared<ScaleAnimation>(s));
-//    _animationManager.addAnimation(make_shared<RotateAnimaton>(r));
-//
-//    _animationManager.addAnimation(make_shared<TranslateAnimation>(t1));
-//    _animationManager.addAnimation(make_shared<ScaleAnimation>(s1));
-//    _animationManager.addAnimation(make_shared<RotateAnimaton>(r1));
-//
-//    _animationManager.addAnimation(make_shared<TranslateAnimation>(t2));
-//    _animationManager.addAnimation(make_shared<ScaleAnimation>(s2));
-//    _animationManager.addAnimation(make_shared<RotateAnimaton>(r2));
+    _animationManager.addAnimation(make_shared<TranslateAnimation>(t));
+    _animationManager.addAnimation(make_shared<ScaleAnimation>(s));
+    _animationManager.addAnimation(make_shared<RotateAnimaton>(r));
+
+    _animationManager.addAnimation(make_shared<TranslateAnimation>(t1));
+    _animationManager.addAnimation(make_shared<ScaleAnimation>(s1));
+    _animationManager.addAnimation(make_shared<RotateAnimaton>(r1));
+
+    _animationManager.addAnimation(make_shared<TranslateAnimation>(t2));
+    _animationManager.addAnimation(make_shared<ScaleAnimation>(s2));
+    _animationManager.addAnimation(make_shared<RotateAnimaton>(r2));
 }
 
-void NativeContext::onPointerDown(int i_point_id) noexcept
+void NativeContext::onPointerDown(int i_point_id) noexcept // mark status之类应该是listener的逻辑
 {
     _commandQueue.addTask([=]{
 
         if(_rect)
         {
-            switch (_status)
-            {
-                case -1: //当前没有手指头按下。按下第一个手指头
-                    _status=1;
-                    _pen_handler_id=i_point_id;
-                    break;
-                case 1:  //当前有一个手指头按下。按下第二个手指头
-                    _status=2;
-                    _scale_handler_ids[0]=_pen_handler_id;
-                    _pen_handler_id=-1;
-                    _scale_handler_ids[1]=i_point_id;
-                    break;
-                case 2:
-                    break;
-            }
-
             auto p=_point_map.find(i_point_id)->second;
             if(_rectTouch)
             {
@@ -204,7 +188,7 @@ void NativeContext::onPointerDown(int i_point_id) noexcept
             }
             else
             {
-                Rect * rect= _rect->onPointerDown(_point_map, i_point_id, p[0], p[1]);
+                Rect * rect= _rect->onPointerDown(_point_map, i_point_id, p[0], p[1]);//层级
 
                 if(rect)
                 {
@@ -236,41 +220,13 @@ void NativeContext::onPointerUp(int i_point_id)noexcept
         if(_rectTouch)
         {
             _rectTouch->onPointerUp(i_point_id);
+        }
 
-            switch (_status)
-            {
-                case -1: //当前没有手指头按下
-                    break;
-                case 1:  //当前有一个手指头按下
-                    _status=-1;
-                    _pen_handler_id=-1;
-                    break;
-                case 2: // 当前有两个手指头按下
-                    _status=1;
+        removePoint(i_point_id);
 
-                    if(_scale_handler_ids[0]==i_point_id)
-                    {
-                        _pen_handler_id=_scale_handler_ids[1];
-
-
-                    } else
-                    {
-                        _pen_handler_id=_scale_handler_ids[0];
-                    }
-
-                    _scale_handler_ids[0]=-1;
-                    _scale_handler_ids[1]=-1;
-
-                    break;
-            }
-
-            removePoint(i_point_id);
-
-            if(_point_map.size()==0)
-            {
-                _rectTouch= nullptr;
-            }
-
+        if(_status==-1)
+        {
+            _rectTouch= nullptr;
         }
     });
 }
@@ -278,12 +234,31 @@ void NativeContext::onPointerUp(int i_point_id)noexcept
 
 void NativeContext::touchDown(int i_point_id) noexcept
 {
+    switch (_status)
+    {
+        case -1: //当前没有手指头按下。按下第一个手指头
+            _status=1;
+            _pen_handler_id=i_point_id;
+            break;
+        case 1:  //当前有一个手指头按下。按下第二个手指头
+            _status=2;
+            _scale_handler_ids[0]=_pen_handler_id;
+            _pen_handler_id=-1;
+            _scale_handler_ids[1]=i_point_id;
+            break;
+        case 2:
+            break;
+    }
+
     auto p=_point_map.find(i_point_id)->second;
 
     if(_status==1)
     {
         _down_x=p[2];
         _down_y=p[3];
+
+        _offset_x=_rect_2->getTranslateX();
+        _offset_y=_rect_2->getTranslateY();
 
     }else if(_status==2)
     {
@@ -294,8 +269,9 @@ void NativeContext::touchDown(int i_point_id) noexcept
         _startPoints={p[2],p[3],p2[2],p2[3]};
 
         _distance=getCurrentDistance();
-
-        _rect_2.get()->setInitTranslate(p[2]-_down_x+_rect_2->getInitTranslateX(),p[3]-_down_y+_rect_2->getInitTranslateY());
+        _scaleRadio=_rect_2->getScaleX();
+        _cosA=_rect_2->getCos();
+        _sinA=_rect_2->getSin();
 
     }
 }
@@ -319,31 +295,15 @@ void NativeContext::touchMove() noexcept
     {
         auto p=_point_map.find(_pen_handler_id)->second;
 
-        _rect_2.get()->setTranslate(p[2]-_down_x+_rect_2->getInitTranslateX(),p[3]-_down_y+_rect_2->getInitTranslateY());
+        _rect_2->setTranslate(p[2]-_down_x+_offset_x,p[3]-_down_y+_offset_y);
     }
 }
 
 void NativeContext::touchUp(int i_point_id) noexcept
 {
 
-    auto p=_point_map.find(i_point_id)->second;
-
     if(_status==2)
     {
-        //处理缩放
-        _scaleRadio=_scaleRadio*getCurrentDistance()/_distance;
-//        _distance=0.0f;
-
-        //处理rotate
-        array<float,4> arr= getcurrentPoints();
-        float cosb=getCosa(_startPoints,arr);
-        float sinb=getSina(_startPoints,arr);
-        float cosa=cosAB(_cosA,_sinA,cosb,sinb);
-        float sina=sinAB(_cosA,_sinA,cosb,sinb);
-
-        _cosA = cosa;
-        _sinA = sina;
-
         if(_scale_handler_ids[0]==i_point_id)
         {
             auto p=_point_map.find(_scale_handler_ids[1])->second;
@@ -360,19 +320,45 @@ void NativeContext::touchUp(int i_point_id) noexcept
             _down_x=p[2];
             _down_y=p[3];
 
-            _pen_handler_id=_point_map.find(_scale_handler_ids[1])->first;
+            _pen_handler_id=_point_map.find(_scale_handler_ids[0])->first;
         }
+
+        _offset_x=_rect_2->getTranslateX();
+        _offset_y=_rect_2->getTranslateY();
+
+        _scale_handler_ids[0]=-1;
+        _scale_handler_ids[1]=-1;
+
+        _scaleRadio=1.0f;
+        _cosA=1.0f;
+        _sinA=1.0f;
+        _distance=0.0f;
 
     }else if(_status==1)
     {
-        //处理位移
-        _rect_2.get()->setInitTranslate(p[2]-_down_x+_rect_2->getInitTranslateX(),p[3]-_down_y+_rect_2->getInitTranslateY());
+        _down_x=0.0f;
+        _down_y=0.0f;
+    }
+
+    switch (_status)
+    {
+        case -1: //当前没有手指头按下
+            break;
+        case 1:  //当前有一个手指头按下
+            _status=-1;
+            _pen_handler_id=-1;
+            break;
+        case 2: // 当前有两个手指头按下
+            _status=1;
+
+            break;
     }
 }
 
 void NativeContext::addPoint(int i_pointId, float i_x, float i_y)noexcept
 {
-    _point_map.insert({i_pointId,{i_x,i_y,0.0f,0.0f}});
+    _point_map[i_pointId] = {i_x,i_y,0.0f,0.0f};
+    //_point_map.insert({i_pointId,{i_x,i_y,0.0f,0.0f}}); // mark operator[]
 }
 
 void NativeContext::removePoint(int i_pointId)noexcept
@@ -430,7 +416,7 @@ float NativeContext::cosAB(float i_cosa,float i_sina,float i_cosb,float i_sinb)n
 }
 
 //cos=a*b/[|a|*|b|]=(x1x2+y1y2)/[√[x1^2+y1^2]*√[x2^2+y2^2]]
-float NativeContext::getCosa(array<float, 4> i_start, array<float, 4> i_end) noexcept
+float NativeContext::getCosa(array<float, 4> i_start, array<float, 4> i_end) noexcept // mark static utils
 {
     float x1= i_start[2]-i_start[0];
     float y1= i_start[3]-i_start[1];
