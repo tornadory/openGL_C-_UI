@@ -34,13 +34,23 @@ public:
     float getScaleY()noexcept ;
     float getCos()noexcept ;
     float getSin()noexcept ;
+    Matrix3X2 getInverseMatrix()noexcept ;
+    void setInverseMatrix(Matrix3X2 i_matrix)noexcept ;
 
 
-    Rect *onPointerDown(map<int,array<float,4>> &i_point_map, int i_point_id, float i_x, float i_y)noexcept ;
-    void onPointerUp(int i_point_id) noexcept;
-    void onPointerMoved(map<int,array<float,4>> &i_point_map) noexcept;
+//    Rect *onPointerDown(map<int,array<float,4>> &i_point_map, int i_point_id, float i_x, float i_y)noexcept ;
+//    void onPointerUp(int i_point_id) noexcept;
+//    void onPointerMoved(map<int,array<float,4>> &i_point_map) noexcept;
 
     void setTouchListener(TouchListener *i_touchListener)noexcept ;
+    TouchListener * getTouchListener()noexcept ;
+
+    //4-4-6 事件分发
+    bool onInterceptTouchEvent(map<int, array<float, 4>> &i_point_map, int i_point_id,
+                               int i_event_type)noexcept ;
+    bool touchEvent(map<int,array<float,4>> &i_point_map, int i_event_type, int i_point_id) noexcept;
+    bool getRectAt(shared_ptr<Rect> &i_rect, float i_x, float i_y,
+                   vector<shared_ptr<Rect>> &i_route)noexcept;
 
 private:
     float _width;

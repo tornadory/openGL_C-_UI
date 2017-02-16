@@ -15,7 +15,7 @@ extern "C"
 void
 Java_com_example_cheng_testndk_MainActivity_onPointerDown(JNIEnv *env, jobject instance, jint i_point_id,jlong _native) {
 
-    ((NativeContext *) _native)->onPointerDown(i_point_id);
+    ((NativeContext *) _native)->depatchTouchEvent(1,i_point_id);
 
 }
 
@@ -23,14 +23,14 @@ extern "C"
 void
 Java_com_example_cheng_testndk_MainActivity_onPointerUp(JNIEnv *env, jobject instance,jint i_point_id,long _native) {
 
-    ((NativeContext *) _native)->onPointerUp(i_point_id);
+    ((NativeContext *) _native)->depatchTouchEvent(3,i_point_id);
 
 }
 
 extern "C"
 void
 Java_com_example_cheng_testndk_MainActivity_onPointerMoved(JNIEnv *env, jobject instance, jlong _native) {
-    ((NativeContext *) _native)->onPointerMoved();
+    ((NativeContext *) _native)->depatchTouchEvent(2,-1);
 
 }
 
