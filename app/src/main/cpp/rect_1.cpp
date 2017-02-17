@@ -271,7 +271,7 @@ bool Rect::getRectAt(shared_ptr<Rect> &i_rect, float i_x, float i_y,
     float y = p[1] + _center[1] * _height;
 
     if(x >= 0 && x <= _width && y >= 0 && y <= _height)
-    {
+        {
 
         i_route.push_back(i_rect);
         for(auto &i : _rectChildren)
@@ -305,6 +305,11 @@ bool Rect::onInterceptTouchEvent(map<int, array<float, 4>> &i_point_map, int i_p
  */
 bool Rect::touchEvent(map<int,array<float, 4>> &i_point_map, int i_event_type, int i_point_id) noexcept
 {
+
+    if(this->getWidth()==200)
+    {
+        return false;
+    }
     return true;
 }
 

@@ -87,5 +87,6 @@ private:
     float _sinA=0;
 
     array<float,4> _startPoints;
+    bool isRectDeal=false;
 
 };
