@@ -46,11 +46,25 @@ public:
     TouchListener * getTouchListener()noexcept ;
 
     //4-4-6 事件分发
+    bool depatchTouchEvent(map<int, array<float, 4>> &i_point_map, int i_event_type,
+                           int i_point_id, bool i_is_first_down, Matrix3X2 &i_mat, float i_x=-1,
+                           float i_y=-1)noexcept ;
     bool onInterceptTouchEvent(map<int, array<float, 4>> &i_point_map, int i_point_id,
-                               int i_event_type)noexcept ;
-    bool touchEvent(map<int,array<float,4>> &i_point_map, int i_event_type, int i_point_id) noexcept;
-    bool getRectAt(shared_ptr<Rect> &i_rect, float i_x, float i_y,
-                   vector<shared_ptr<Rect>> &i_route)noexcept;
+                                   int i_event_type, Matrix3X2 &i_mat)noexcept ;
+
+    bool touchEvent(map<int, array<float, 4>> &i_point_map, int i_event_type, int i_point_id,
+                        Matrix3X2 &i_mat) noexcept;
+
+    bool touchEventRect(map<int, array<float, 4>> &i_point_map, int i_event_type, int i_point_id,
+                    Matrix3X2 &i_mat) noexcept;
+
+    void deleteTouchChild(Rect * i_rect)noexcept ;
+
+    void updatePointMap(map<int, array<float, 4>> &i_point_map,int i_point_id, Matrix3X2& i_mat)noexcept ;
+    void updatePointMap(map<int, array<float, 4>> &i_point_map, Matrix3X2& i_mat)noexcept ;
+
+    Rect * getRectAt(shared_ptr<Rect> &i_rect, float i_x, float i_y,
+                     Rect *i_lastRoute)noexcept;
 
 private:
     float _width;
@@ -66,6 +80,7 @@ private:
     Matrix3X2 _inverseMatrix;
 
     TouchListener * _touchListener= nullptr;
+    Rect * _touchChildren;
 
 };
 

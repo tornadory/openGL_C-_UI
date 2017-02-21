@@ -259,8 +259,8 @@ void Rect::setInverseMatrix(Matrix3X2 i_matrix)noexcept
 /**
  * 根据 x,y 得到从 根路径到最上层的所有的rect
  */
-bool Rect::getRectAt(shared_ptr<Rect> &i_rect, float i_x, float i_y,
-                     vector<shared_ptr<Rect>> &i_route)noexcept
+Rect * Rect::getRectAt(shared_ptr<Rect> &i_rect, float i_x, float i_y,
+                       Rect *i_lastRoute)noexcept
 {
 
     auto mat = Matrix3X2::translation(-this->_translate[0],-this->_translate[1]).rotate(this->_rotate[0],-this->_rotate[1]).scale(1/this->_scale[0],1/this->_scale[1]);
@@ -273,57 +273,201 @@ bool Rect::getRectAt(shared_ptr<Rect> &i_rect, float i_x, float i_y,
     if(x >= 0 && x <= _width && y >= 0 && y <= _height)
         {
 
-        i_route.push_back(i_rect);
+        i_lastRoute=this;
         for(auto &i : _rectChildren)
         {
 
-            if (i->getRectAt(i, p[0], p[1], i_route))
+            Rect * rect=i->getRectAt(i, p[0], p[1], i_lastRoute);
+            if (rect)
             {
-                return true;
+                this->_touchChildren=rect;
+
+                return this;
             }
         }
 
-        return true;
+        return this;
 
     } else
     {
-        return false;
+        return nullptr;
     }
 }
 
+
+
 /**
+ *  bool 表示事件是否处理了
+ *
  * 是否拦截事件，默认不拦截
  */
-bool Rect::onInterceptTouchEvent(map<int, array<float, 4>> &i_point_map, int i_point_id,
-                                 int i_event_type)noexcept
+
+bool Rect::depatchTouchEvent(map<int, array<float, 4>> &i_point_map, int i_event_type,
+                             int i_point_id, bool i_is_first_down, Matrix3X2 &i_mat, float i_x,
+                             float i_y)noexcept
 {
+    dbglog("===%f===%d==depatchTouchEvent===",_width,i_event_type);
+
+    if(i_is_first_down)
+    {
+        auto mat = Matrix3X2::translation(-this->_translate[0],-this->_translate[1]).rotate(this->_rotate[0],-this->_rotate[1]).scale(1/this->_scale[0],1/this->_scale[1]);
+        auto p = mat.transformPoint({i_x, i_y});
+
+        float x = p[0] + _center[0] * _width;
+        float y = p[1] + _center[1] * _height;
+
+        if(x >= 0 && x <= _width && y >= 0 && y <= _height) //在范围内
+        {
+            Matrix3X2 mat_myself=i_mat*mat;
+            updatePointMap(i_point_map,i_point_id,mat_myself); //更新point_map
+
+            if(onInterceptTouchEvent(i_point_map, i_point_id, i_event_type, mat_myself)) //拦截的话
+            {
+                return touchEvent(i_point_map, i_event_type, i_point_id, mat);
+
+            } else
+            {
+                for(auto &i : _rectChildren)
+                {
+                    if(i->depatchTouchEvent(i_point_map,i_event_type,i_point_id,i_is_first_down,mat_myself,p[0],p[1]))
+                    {
+                        _touchChildren=i.get();
+                        return true;
+
+                    }
+                }
+
+                updatePointMap(i_point_map,i_point_id,mat_myself); //更新point_map
+
+                return touchEvent(i_point_map, i_event_type, i_point_id, mat);//children  没有处理，自己处理
+            }
+        } else //不在范围内
+        {
+            return false;
+        }
+    }
+    else
+    {
+        auto mat =i_mat*Matrix3X2::translation(-this->_translate[0],-this->_translate[1]).rotate(this->_rotate[0],-this->_rotate[1]).scale(1/this->_scale[0],1/this->_scale[1]);
+
+        if(i_event_type==2)
+        {
+            updatePointMap(i_point_map,mat);
+        } else
+        {
+            updatePointMap(i_point_map,i_point_id,mat);
+        }
+
+        if(onInterceptTouchEvent(i_point_map, i_point_id, i_event_type, mat)) //拦截的话,处理children的 touchChildren=nullptr
+        {
+
+            deleteTouchChild(this);
+
+            return touchEvent(i_point_map, i_event_type, i_point_id, mat);
+
+        } else
+        {
+            if(_touchChildren!= nullptr)
+            {
+                if(_touchChildren->depatchTouchEvent(i_point_map,i_event_type,i_point_id,i_is_first_down,mat,-1,-1))
+                {
+                    return true;
+
+                } else
+                {
+                    if(i_event_type==2)
+                    {
+                        updatePointMap(i_point_map,mat);
+                    } else
+                    {
+                        updatePointMap(i_point_map,i_point_id,mat);
+                    }
+
+                    return touchEvent(i_point_map, i_event_type, i_point_id, mat);
+                }
+            } else
+            {
+                return touchEvent(i_point_map, i_event_type, i_point_id, mat);
+            }
+        }
+    }
+}
+
+bool Rect::onInterceptTouchEvent(map<int, array<float, 4>> &i_point_map, int i_point_id,
+                                 int i_event_type, Matrix3X2 &i_mat)noexcept
+{
+//    if(i_event_type==2&&_width>400)
+//    {
+//        return true;
+//    }
     return false;
 }
 
 /**
- *
+ * 处理touch
  */
-bool Rect::touchEvent(map<int,array<float, 4>> &i_point_map, int i_event_type, int i_point_id) noexcept
+bool Rect::touchEvent(map<int, array<float, 4>> &i_point_map, int i_event_type, int i_point_id,
+                      Matrix3X2 &i_mat) noexcept
 {
 
-    if(this->getWidth()==200)
+    if(_touchListener!= nullptr&&_touchListener->touchEvent(i_event_type,i_point_id,this))
     {
-        return false;
+        return true;
+
+    } else
+    {
+       return  touchEventRect(i_point_map,i_event_type,i_point_id,i_mat);
     }
-    return true;
 }
 
+bool Rect::touchEventRect(map<int, array<float, 4>> &i_point_map, int i_event_type, int i_point_id,
+                          Matrix3X2 &i_mat) noexcept
+{
+    return false;
+}
 
+void Rect::deleteTouchChild(Rect *i_rect) noexcept
+{
+    if(i_rect!= nullptr)
+    {
+        if(i_rect->_touchChildren!=nullptr)
+        {
+            i_rect->_touchChildren->deleteTouchChild(i_rect->_touchChildren);
 
+            i_rect->_touchChildren = nullptr;
 
+            return ;
 
+        } else
+        {
+            return ;
+        }
+    }
+}
 
+void Rect::updatePointMap(map<int, array<float, 4>> &i_point_map, int i_point_id, Matrix3X2& i_mat) noexcept
+{
 
+    array<float, 4> &i = i_point_map.find(i_point_id)->second;
+    auto p = i_mat.transformPoint({i[0], i[1]});
+    i[2] = p[0]+_center[0] * _width;
+    i[3] = p[1]+_center[1] * _height;
 
+    dbglog("%d==%f,%f,%f,%f",i_point_map.find(i_point_id)->first,i[0],i[1],i[2],i[3]);
+}
 
+void Rect::updatePointMap(map<int, array<float, 4>>& i_point_map, Matrix3X2& i_mat) noexcept
+{
+    for (auto i = i_point_map.begin(); i != i_point_map.end(); ++i)
+    {
+        auto p=i_mat.transformPoint({i->second[0],i->second[1]});
 
+        i->second[2]=p[0]+_center[0] * _width;
+        i->second[3]=p[1]+_center[1] * _height;
 
-
+        dbglog("%d==%f,%f,%f,%f",i->first, i->second[0], i->second[1], i->second[2], i->second[3]);
+    }
+}
 
 
 

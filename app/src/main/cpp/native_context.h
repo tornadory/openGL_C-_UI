@@ -30,9 +30,8 @@ public:
 //     virtual void touchDown(int i_point_id) noexcept override final;
 //     virtual void touchUp(int i_point_id) noexcept override final;
 
-     virtual bool touchEvent(int i_event_type, int i_point_id, shared_ptr<Rect> i_rect)noexcept override final ;
-     void getRectAt(float i_x, float i_y, int i_point_id,
-                         vector<shared_ptr<Rect>> &i_route)noexcept ;
+     virtual bool touchEvent(int i_event_type, int i_point_id, Rect *i_rect)noexcept override final ;
+     void getRectAt(int i_point_id, Rect *i_lastTouch)noexcept ;
      void depatchTouchEvent(int i_event_type, int i_point_id)noexcept ;
      void handleTouch(int i_event_type, int i_point_id)noexcept ;
 
@@ -58,6 +57,7 @@ private:
     shared_ptr<Rect> _rect_2=make_shared<Rect>();
     shared_ptr<Rect> _rect_3=make_shared<Rect>();
 
+    Rect * _lastTouch= _rect.get();
     vector<shared_ptr<Rect>> _route;
     bool isFirstDown= true;
 

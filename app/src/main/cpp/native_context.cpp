@@ -431,71 +431,69 @@ float NativeContext::getSina(array<float, 4> i_start, array<float, 4> i_end) noe
 }
 
 //4-4-6 事件分发
-void NativeContext::depatchTouchEvent(int i_event_type, int i_point_id) noexcept {
-    switch (i_event_type) {
-        case 1: //down
-            if (isFirstDown)
-            {
-                auto a = _point_map.find(i_point_id)->second;
-                getRectAt(a[0], a[1], 0, _route);
-            }
-            break;
-        case 2: //move
-            break;
-        case 3: //up
-            break;
-    }
+void NativeContext::depatchTouchEvent(int i_event_type, int i_point_id) noexcept
+    {
+        Matrix3X2 mat;
 
-
-    Matrix3X2 mat;
-
-    for (int i = 0; i < _route.size(); ++i) {
-        Rect *rect = (_route[i]).get();
-
-        mat=mat*Matrix3X2::translation(-rect->getTranslateX(),-rect->getTranslateY()).rotate(rect->getCos(),-rect->getSin()).scale(1/rect->getScaleX(),1/rect->getScaleY());
-        rect->setInverseMatrix(mat);
-
-        switch (i_event_type) {
-            case 1: //down
-                break;
-            case 2: //move
-                for (auto i = _point_map.begin(); i != _point_map.end(); ++i) {
-                    auto p = rect->getInverseMatrix().transformPoint({i->second[0], i->second[1]});
-
-                    i->second[2] = p[0]+rect->getWidth()/2;
-                    i->second[3] = p[1]+rect->getHeight()/2;
-                }
-                break;
-            case 3: //up
-                break;
-        }
-
-
-        if (i_point_id != -1) //down和up的情况。
+        if(i_point_id!=-1)
         {
             array<float, 4> &i = _point_map.find(i_point_id)->second;
-            auto p = rect->getInverseMatrix().transformPoint({i[0], i[1]});
-            i[2] = p[0]+rect->getWidth()/2;
-            i[3] = p[1]+rect->getHeight()/2;
+            _rect->depatchTouchEvent(_point_map, i_event_type, i_point_id, isFirstDown, mat, i[0], i[1]);
+        } else
+        {
+            _rect->depatchTouchEvent(_point_map, i_event_type, i_point_id, isFirstDown, mat,-1, -1);
         }
 
-        //判断，如果有拦截的话，则更新路径表
-        if (rect->onInterceptTouchEvent(_point_map, i_point_id, i_event_type)) {
 
-//            cheng 写的不好
-//            for(int j=_route.size()-1;j>i;--j)
-//            {
-//                _route.erase(_route.begin()+j);
-//            }
-
-            _route.erase(_route.begin() + i + 1, _route.end()); //郭老师说这种更好
-
-            break;
-        }
-    }
-
-    handleTouch(i_event_type, i_point_id);
-
+//    Matrix3X2 mat;
+//
+//    for (int i = 0; i < _route.size(); ++i) {
+//        Rect *rect = (_route[i]).get();
+//
+//        mat=mat*Matrix3X2::translation(-rect->getTranslateX(),-rect->getTranslateY()).rotate(rect->getCos(),-rect->getSin()).scale(1/rect->getScaleX(),1/rect->getScaleY());
+//        rect->setInverseMatrix(mat);
+//
+//        switch (i_event_type) {
+//            case 1: //down
+//                break;
+//            case 2: //move
+//                for (auto i = _point_map.begin(); i != _point_map.end(); ++i) {
+//                    auto p = rect->getInverseMatrix().transformPoint({i->second[0], i->second[1]});
+//
+//                    i->second[2] = p[0]+rect->getWidth()/2;
+//                    i->second[3] = p[1]+rect->getHeight()/2;
+//                }
+//                break;
+//            case 3: //up
+//                break;
+//        }
+//
+//
+//        if (i_point_id != -1) //down和up的情况。
+//        {
+//            array<float, 4> &i = _point_map.find(i_point_id)->second;
+//            auto p = rect->getInverseMatrix().transformPoint({i[0], i[1]});
+//            i[2] = p[0]+rect->getWidth()/2;
+//            i[3] = p[1]+rect->getHeight()/2;
+//        }
+//
+//        //判断，如果有拦截的话，则更新路径表
+//        if (rect->depatchTouchEvent(_point_map, i_point_id, i_event_type)) {
+//
+////            cheng 写的不好
+////            for(int j=_route.size()-1;j>i;--j)
+////            {
+////                _route.erase(_route.begin()+j);
+////            }
+//
+//            _route.erase(_route.begin() + i + 1, _route.end()); //郭老师说这种更好
+//
+//            break;
+//        }
+//    }
+//
+//    handleTouch(i_event_type, i_point_id);
+//
     if(i_event_type==3)
     {
         removePoint(i_point_id);
@@ -511,45 +509,47 @@ void NativeContext::depatchTouchEvent(int i_event_type, int i_point_id) noexcept
     }
 }
 
-void NativeContext::getRectAt(float i_x, float i_y, int i_point_id,
-                              vector<shared_ptr<Rect>> &i_route)noexcept {
-    _rect->getRectAt(_rect, i_x, i_y, i_route);
+void NativeContext::getRectAt(int i_point_id, Rect *i_lastTouch)noexcept {
+
+    auto a = _point_map.find(i_point_id)->second;
+
+    _rect->getRectAt(_rect, a[0], a[1], i_lastTouch);
 }
 
 void NativeContext::handleTouch(int i_event_type, int i_point_id)noexcept {
-    //处理touch事件
-    for (int i = _route.size() - 1; i >= 0; --i) {
-        Rect *rect = (_route[i]).get();
-
-        if (rect->getTouchListener() != nullptr &&
-            rect->getTouchListener()->touchEvent(i_event_type, i_point_id, _route[i]) ||
-            rect->touchEvent(_point_map, i_event_type, i_point_id)) {
-
-            break;
-        } else if (i > 0)
-        {
-            Rect *rect_ = _route[i - 1].get();
-            //重新更新  point （回溯) 2017年2月17日23:02:32  import
-
-            for (auto i = _point_map.begin(); i != _point_map.end(); ++i) {
-                auto p = rect_->getInverseMatrix().transformPoint({i->second[0], i->second[1]});
-
-                i->second[2] = p[0]+rect_->getWidth()/2;
-                i->second[3] = p[1]+rect_->getHeight()/2;
-            }
-
-            if (isFirstDown) //不是最后一项处理的话
-            {
-                _route.pop_back();
-            }
-        }
-    }
+//    //处理touch事件
+//    for (int i = _route.size() - 1; i >= 0; --i) {
+//        Rect *rect = (_route[i]).get();
+//
+//        if (rect->getTouchListener() != nullptr &&
+//            rect->getTouchListener()->touchEvent(i_event_type, i_point_id, _route[i]) ||
+//            rect->touchEvent(_point_map, i_event_type, i_point_id)) {
+//
+//            break;
+//        } else if (i > 0)
+//        {
+//            Rect *rect_ = _route[i - 1].get();
+//            //重新更新  point （回溯) 2017年2月17日23:02:32  import
+//
+//            for (auto i = _point_map.begin(); i != _point_map.end(); ++i) {
+//                auto p = rect_->getInverseMatrix().transformPoint({i->second[0], i->second[1]});
+//
+//                i->second[2] = p[0]+rect_->getWidth()/2;
+//                i->second[3] = p[1]+rect_->getHeight()/2;
+//            }
+//
+//            if (isFirstDown) //不是最后一项处理的话
+//            {
+//                _route.pop_back();
+//            }
+//        }
+//    }
 }
 
-bool NativeContext::touchEvent(int i_event_type, int i_point_id, shared_ptr<Rect> i_rect) noexcept
+bool NativeContext::touchEvent(int i_event_type, int i_point_id, Rect *i_rect) noexcept
 {
 
-    if(i_rect.get()==_rect.get())
+    if(i_rect==_rect.get())
     {
         switch(i_event_type)
         {

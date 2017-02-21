@@ -12,7 +12,7 @@ struct TouchListener {
 //    virtual void touchDown(int i_point_id) =0;
 //    virtual void touchUp(int i_point_id) =0;
 
-      virtual bool touchEvent(int i_event_id, int i_point_id, shared_ptr<Rect> i_rect) =0;
+      virtual bool touchEvent(int i_event_id, int i_point_id, Rect *i_rect) =0;
 
 };
 
