@@ -80,13 +80,10 @@ private:
 
     float _down_x=0.0f;
     float _down_y=0.0f;
-    float _offset_x=0.0f;
-    float _offset_y=0.0f;
 
     float _cosA=1;
     float _sinA=0;
 
     array<float,4> _startPoints;
-    bool isRectDeal=false;
 
 };

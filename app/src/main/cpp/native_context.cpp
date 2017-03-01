@@ -109,8 +109,8 @@ void NativeContext::draw()noexcept {
 }
 
 void NativeContext::initRect() noexcept {
-    _rect->setWidth(_windowWidth / 1.1);
-    _rect->setHeight(_windowHeight / 1.1);
+    _rect->setWidth(400);
+    _rect->setHeight(800);
     _rect->setCenter(0.5f, 0.5f);
     _rect->setInitVertex(20.0f, 30.0f);
     _rect->setColor({1.0f, 1.0f, 1.0f, 1.0f});
@@ -546,162 +546,304 @@ void NativeContext::handleTouch(int i_event_type, int i_point_id)noexcept {
 //    }
 }
 
+//bool NativeContext::touchEvent(int i_event_type, int i_point_id, Rect *i_rect) noexcept
+//{
+//
+//    if(i_rect==_rect.get())
+//    {
+//        switch(i_event_type)
+//        {
+//            case 1: {
+//
+//                auto p = _point_map.find(i_point_id)->second;
+//
+//                float x0=p[2]-_rect->getWidth()/2;
+//                float y0=p[3]-_rect->getHeight()/2;
+//
+//                Matrix3X2 mat=Matrix3X2::translation(-_rect_2->getTranslateX(),-_rect_2->getTranslateY()).rotate(_rect_2->getCos(),-_rect_2->getSin()).scale(1/_rect_2->getScaleX(),1/_rect_2->getScaleY());
+//                auto a=mat.transformPoint({x0,y0});
+//
+//                float x=a[0]+_rect_2->getWidth()/2;
+//                float y=a[1]+_rect_2->getHeight()/2;
+//
+//                //判断 _rect 的点，是否在_rect_2上面
+//                if(x >= 0 && x <= _rect_2->getWidth() && y >= 0 && y <= _rect_2->getHeight()&&isFirstDown)
+//                {
+//                    isRectDeal=true;
+//
+//                } else
+//                {
+//                    if(!isRectDeal)
+//                    {
+//                        return false;
+//                    }
+//                }
+//
+//                if(isRectDeal)
+//                {
+//                    switch (_status) {
+//                        case -1: //当前没有手指头按下。按下第一个手指头
+//                            _status = 1;
+//                            _pen_handler_id = i_point_id;
+//                            break;
+//                        case 1:  //当前有一个手指头按下。按下第二个手指头
+//                            _status = 2;
+//                            _scale_handler_ids[0] = _pen_handler_id;
+//                            _pen_handler_id = -1;
+//                            _scale_handler_ids[1] = i_point_id;
+//                            break;
+//                        case 2:
+//                            break;
+//                    }
+//                    if (_status == 1) {
+//
+//                        _down_x = p[2];
+//                        _down_y = p[3];
+//
+//                        _offset_x = _rect_2->getTranslateX();
+//                        _offset_y = _rect_2->getTranslateY();
+//
+//                    } else if (_status == 2) {
+//
+//                        auto p = _point_map.find(_scale_handler_ids[0])->second;
+//                        auto p2 = _point_map.find(_scale_handler_ids[1])->second;
+//
+//                        _startPoints = {p[2], p[3], p2[2], p2[3]};
+//
+//                        _distance = getCurrentDistance();
+//                        _scaleRadio = _rect_2->getScaleX();
+//                        _cosA = _rect_2->getCos();
+//                        _sinA = _rect_2->getSin();
+//
+//                    }
+//                }
+//
+//            }
+//                break;
+//            case 2: {
+//
+//                if(isRectDeal) {
+//                    if (_status == 2) {
+//                        float scale = _scaleRadio * getCurrentDistance() / _distance;
+//                        _rect_2.get()->setScale(scale, scale);
+//
+//                        array<float, 4> arr = getcurrentPoints();
+//                        float cosb = getCosa(_startPoints, arr);
+//                        float sinb = getSina(_startPoints, arr);
+//                        float cos = cosAB(_cosA, _sinA, cosb, sinb);
+//                        float sin = sinAB(_cosA, _sinA, cosb, sinb);
+//                        _rect_2.get()->setRotate(cos, sin);
+//                    }
+//                    else if (_status == 1) {
+//                        auto p = _point_map.find(_pen_handler_id)->second;
+//
+//                        _rect_2->setTranslate(p[2] - _down_x + _offset_x,
+//                                              p[3] - _down_y + _offset_y);
+//                    }
+//                    break;
+//                }
+//            }
+//            case 3: {
+//
+//                if(isRectDeal)
+//                {
+//                    if (_status == 2)
+//                    {
+//                        if (_scale_handler_ids[0] == i_point_id) {
+//                            auto p = _point_map.find(_scale_handler_ids[1])->second;
+//
+//                            _down_x = p[2];
+//                            _down_y = p[3];
+//
+//                            _pen_handler_id = _point_map.find(_scale_handler_ids[1])->first;
+//
+//                        } else {
+//                            auto p = _point_map.find(_scale_handler_ids[0])->second;
+//
+//                            _down_x = p[2];
+//                            _down_y = p[3];
+//
+//                            _pen_handler_id = _point_map.find(_scale_handler_ids[0])->first;
+//                        }
+//
+//                        _offset_x = _rect_2->getTranslateX();
+//                        _offset_y = _rect_2->getTranslateY();
+//
+//                        _scale_handler_ids[0] = -1;
+//                        _scale_handler_ids[1] = -1;
+//
+//                        _scaleRadio = 1.0f;
+//                        _cosA = 1.0f;
+//                        _sinA = 1.0f;
+//                        _distance = 0.0f;
+//
+//                    } else if (_status == 1) {
+//                        _down_x = 0.0f;
+//                        _down_y = 0.0f;
+//                    }
+//
+//                    switch (_status) {
+//                        case -1: //当前没有手指头按下
+//                            break;
+//                        case 1:  //当前有一个手指头按下
+//                            _status = -1;
+//                            _pen_handler_id = -1;
+//
+//                            isRectDeal=false;
+//                            break;
+//                        case 2: // 当前有两个手指头按下
+//                            _status = 1;
+//
+//                            break;
+//                    }
+//                    break;
+//                }
+//            }
+//        }
+//        return true;
+//    }
+//
+//    return false;
+//}
+
+
 bool NativeContext::touchEvent(int i_event_type, int i_point_id, Rect *i_rect) noexcept
 {
 
-    if(i_rect==_rect.get())
+    dbglog("======touchEvent========");
+
+    if (i_rect == _rect_2.get())
     {
-        switch(i_event_type)
-        {
+        switch (i_event_type) {
             case 1: {
 
                 auto p = _point_map.find(i_point_id)->second;
 
-                float x0=p[2]-_rect->getWidth()/2;
-                float y0=p[3]-_rect->getHeight()/2;
-
-                Matrix3X2 mat=Matrix3X2::translation(-_rect_2->getTranslateX(),-_rect_2->getTranslateY()).rotate(_rect_2->getCos(),-_rect_2->getSin()).scale(1/_rect_2->getScaleX(),1/_rect_2->getScaleY());
-                auto a=mat.transformPoint({x0,y0});
-
-                float x=a[0]+_rect_2->getWidth()/2;
-                float y=a[1]+_rect_2->getHeight()/2;
-
-                //判断 _rect 的点，是否在_rect_2上面
-                if(x >= 0 && x <= _rect_2->getWidth() && y >= 0 && y <= _rect_2->getHeight()&&isFirstDown)
-                {
-                    isRectDeal=true;
-
-                } else
-                {
-                    if(!isRectDeal)
-                    {
-                        return false;
-                    }
+                switch (_status) {
+                    case -1: //当前没有手指头按下。按下第一个手指头
+                        _status = 1;
+                        _pen_handler_id = i_point_id;
+                        break;
+                    case 1:  //当前有一个手指头按下。按下第二个手指头
+                        _status = 2;
+                        _scale_handler_ids[0] = _pen_handler_id;
+                        _pen_handler_id = -1;
+                        _scale_handler_ids[1] = i_point_id;
+                        break;
+                    case 2:
+                        break;
                 }
+                if (_status == 1) {
 
-                if(isRectDeal)
-                {
-                    switch (_status) {
-                        case -1: //当前没有手指头按下。按下第一个手指头
-                            _status = 1;
-                            _pen_handler_id = i_point_id;
-                            break;
-                        case 1:  //当前有一个手指头按下。按下第二个手指头
-                            _status = 2;
-                            _scale_handler_ids[0] = _pen_handler_id;
-                            _pen_handler_id = -1;
-                            _scale_handler_ids[1] = i_point_id;
-                            break;
-                        case 2:
-                            break;
-                    }
-                    if (_status == 1) {
+                    _down_x = p[2];
+                    _down_y = p[3];
+
+                    dbglog("down==%f==%f==",_down_x ,_down_y);
+                    dbglog("down==original==%f==%f==",_rect_2->getTranslateX(),_rect_2->getTranslateY());
+
+                } else if (_status == 2) {
+
+//                    auto p = _point_map.find(_scale_handler_ids[0])->second;
+//                    auto p2 = _point_map.find(_scale_handler_ids[1])->second;
+
+//                    _startPoints = {p[2], p[3], p2[2], p2[3]};
+//
+//                    _distance = getCurrentDistance();
+//                    _scaleRadio = _rect_2->getScaleX();
+//                    _cosA = _rect_2->getCos();
+//                    _sinA = _rect_2->getSin();
+
+                }
+            }
+
+                break;
+            case 2: {
+
+                if (_status == 2) {
+//                    float scale = _scaleRadio * getCurrentDistance() / _distance;
+//                    _rect_2.get()->setScale(scale, scale);
+//
+//                    array<float, 4> arr = getcurrentPoints();
+//                    float cosb = getCosa(_startPoints, arr);
+//                    float sinb = getSina(_startPoints, arr);
+//                    float cos = cosAB(_cosA, _sinA, cosb, sinb);
+//                    float sin = sinAB(_cosA, _sinA, cosb, sinb);
+//                    _rect_2.get()->setRotate(cos, sin);
+                }
+                else if (_status == 1) {
+
+                    auto p = _point_map.find(_pen_handler_id)->second;
+
+                    float x=_rect_2->getTranslateX();
+                    float y=_rect_2->getTranslateY();
+
+
+                    dbglog("original==%f==%f==",_rect_2->getTranslateX(),_rect_2->getTranslateY());
+
+                    _rect_2->setTranslate(p[2] - _down_x + x,
+                                          p[3] - _down_y + y);
+
+                    dbglog("aa==%f==%f==",_down_x ,_down_y);
+                    dbglog("dd==%f==%f==",p[2] ,p[3]);
+                    dbglog("bb==%f==%f==",p[2] - _down_x,p[3] - _down_y);
+                    dbglog("cc==%f==%f==",_rect_2->getTranslateX(),_rect_2->getTranslateY());
+
+//                    _down_x=p[2];
+//                    _down_y=p[3];
+                }
+                break;
+            }
+            case 3: {
+
+                if (_status == 2) {
+                    if (_scale_handler_ids[0] == i_point_id) {
+                        auto p = _point_map.find(_scale_handler_ids[1])->second;
 
                         _down_x = p[2];
                         _down_y = p[3];
 
-                        _offset_x = _rect_2->getTranslateX();
-                        _offset_y = _rect_2->getTranslateY();
+                        _pen_handler_id = _point_map.find(_scale_handler_ids[1])->first;
 
-                    } else if (_status == 2) {
-
+                    } else {
                         auto p = _point_map.find(_scale_handler_ids[0])->second;
-                        auto p2 = _point_map.find(_scale_handler_ids[1])->second;
 
-                        _startPoints = {p[2], p[3], p2[2], p2[3]};
+                        _down_x = p[2];
+                        _down_y = p[3];
 
-                        _distance = getCurrentDistance();
-                        _scaleRadio = _rect_2->getScaleX();
-                        _cosA = _rect_2->getCos();
-                        _sinA = _rect_2->getSin();
-
+                        _pen_handler_id = _point_map.find(_scale_handler_ids[0])->first;
                     }
+
+//                    _scale_handler_ids[0] = -1;
+//                    _scale_handler_ids[1] = -1;
+//
+//                    _scaleRadio = 1.0f;
+//                    _cosA = 1.0f;
+//                    _sinA = 1.0f;
+//                    _distance = 0.0f;
+
+                } else if (_status == 1) {
+
+                    _down_x = 0.0f;
+                    _down_y = 0.0f;
                 }
 
-            }
+                switch (_status) {
+                    case -1: //当前没有手指头按下
+                        break;
+                    case 1:  //当前有一个手指头按下
+                        _status = -1;
+                        _pen_handler_id = -1;
+
+                        break;
+                    case 2: // 当前有两个手指头按下
+                        _status = 1;
+
+                        break;
+                }
                 break;
-            case 2: {
-
-                if(isRectDeal) {
-                    if (_status == 2) {
-                        float scale = _scaleRadio * getCurrentDistance() / _distance;
-                        _rect_2.get()->setScale(scale, scale);
-
-                        array<float, 4> arr = getcurrentPoints();
-                        float cosb = getCosa(_startPoints, arr);
-                        float sinb = getSina(_startPoints, arr);
-                        float cos = cosAB(_cosA, _sinA, cosb, sinb);
-                        float sin = sinAB(_cosA, _sinA, cosb, sinb);
-                        _rect_2.get()->setRotate(cos, sin);
-                    }
-                    else if (_status == 1) {
-                        auto p = _point_map.find(_pen_handler_id)->second;
-
-                        _rect_2->setTranslate(p[2] - _down_x + _offset_x,
-                                              p[3] - _down_y + _offset_y);
-                    }
-                    break;
-                }
-            }
-            case 3: {
-
-                if(isRectDeal)
-                {
-                    if (_status == 2)
-                    {
-                        if (_scale_handler_ids[0] == i_point_id) {
-                            auto p = _point_map.find(_scale_handler_ids[1])->second;
-
-                            _down_x = p[2];
-                            _down_y = p[3];
-
-                            _pen_handler_id = _point_map.find(_scale_handler_ids[1])->first;
-
-                        } else {
-                            auto p = _point_map.find(_scale_handler_ids[0])->second;
-
-                            _down_x = p[2];
-                            _down_y = p[3];
-
-                            _pen_handler_id = _point_map.find(_scale_handler_ids[0])->first;
-                        }
-
-                        _offset_x = _rect_2->getTranslateX();
-                        _offset_y = _rect_2->getTranslateY();
-
-                        _scale_handler_ids[0] = -1;
-                        _scale_handler_ids[1] = -1;
-
-                        _scaleRadio = 1.0f;
-                        _cosA = 1.0f;
-                        _sinA = 1.0f;
-                        _distance = 0.0f;
-
-                    } else if (_status == 1) {
-                        _down_x = 0.0f;
-                        _down_y = 0.0f;
-                    }
-
-                    switch (_status) {
-                        case -1: //当前没有手指头按下
-                            break;
-                        case 1:  //当前有一个手指头按下
-                            _status = -1;
-                            _pen_handler_id = -1;
-
-                            isRectDeal=false;
-                            break;
-                        case 2: // 当前有两个手指头按下
-                            _status = 1;
-
-                            break;
-                    }
-                    break;
-                }
             }
         }
-        return true;
     }
 
-    return false;
+    return true;
 }

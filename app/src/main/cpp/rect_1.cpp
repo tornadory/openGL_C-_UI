@@ -306,7 +306,7 @@ bool Rect::depatchTouchEvent(map<int, array<float, 4>> &i_point_map, int i_event
                              int i_point_id, bool i_is_first_down, Matrix3X2 &i_mat, float i_x,
                              float i_y)noexcept
 {
-    dbglog("===%f===%d==depatchTouchEvent===",_width,i_event_type);
+//    dbglog("===%f===%d==depatchTouchEvent===",_width,i_event_type);
 
     if(i_is_first_down)
     {
@@ -453,7 +453,7 @@ void Rect::updatePointMap(map<int, array<float, 4>> &i_point_map, int i_point_id
     i[2] = p[0]+_center[0] * _width;
     i[3] = p[1]+_center[1] * _height;
 
-    dbglog("%d==%f,%f,%f,%f",i_point_map.find(i_point_id)->first,i[0],i[1],i[2],i[3]);
+//    dbglog("%d==%f,%f,%f,%f",i_point_map.find(i_point_id)->first,i[0],i[1],i[2],i[3]);
 }
 
 void Rect::updatePointMap(map<int, array<float, 4>>& i_point_map, Matrix3X2& i_mat) noexcept
@@ -465,7 +465,7 @@ void Rect::updatePointMap(map<int, array<float, 4>>& i_point_map, Matrix3X2& i_m
         i->second[2]=p[0]+_center[0] * _width;
         i->second[3]=p[1]+_center[1] * _height;
 
-        dbglog("%d==%f,%f,%f,%f",i->first, i->second[0], i->second[1], i->second[2], i->second[3]);
+        dbglog("=%f===%d==%f,%f,%f,%f",_width,i->first, i->second[0], i->second[1], i->second[2], i->second[3]);
     }
 }
 
