@@ -117,6 +117,7 @@ float Rect::getSin()noexcept
 
 void Rect::addRectChild(shared_ptr<Rect> i_rect)noexcept
 {
+    i_rect->setParentRect(this);
     _rectChildren.push_back(i_rect);
 }
 void Rect::draw(RenderContext &i_rendContext, Matrix3X2 i_matix) noexcept
@@ -501,6 +502,21 @@ void Rect::updatePointMap(map<int, array<float, 4>>& i_point_map, Matrix3X2& i_m
     }
 }
 
+void Rect::setParentRect(Rect *i_parent)noexcept
+{
+    _parent=i_parent;
+}
+
+void Rect::requestDisallowInterceptTouchEvent(bool i_requestDisallowInterceptTouchEvent)noexcept
+{
+    if(_parent!= nullptr)
+    {
+        _parent->requestDisallowInterceptTouchEvent(i_requestDisallowInterceptTouchEvent);
+        _parent->_requestDisallowInterceptTouchEvent=i_requestDisallowInterceptTouchEvent;
+    }
+
+}
+
 
 bool RectParent::onInterceptTouchEvent(map<int, array<float, 4>> &i_point_map, int i_point_id,
                                         int i_event_type, Matrix3X2 &i_mat) noexcept {
@@ -543,16 +559,9 @@ bool RectParent::onInterceptTouchEvent(map<int, array<float, 4>> &i_point_map, i
 
                    auto p = i_point_map.find(_pen_handler_id)->second;
 
-                   if(abs(p[3] - _down_y)>abs(p[2]-_down_x)&&!isHorizontal)
+                   if(abs(p[3] - _down_y)>abs(p[2]-_down_x)&&!_requestDisallowInterceptTouchEvent)
                    {
                        return true;
-
-                   } else
-                   {
-                       isHorizontal= true;
-
-                       _down_x=p[2];
-                       _down_y=p[3];
                    }
                }
 
@@ -590,7 +599,6 @@ bool RectParent::onInterceptTouchEvent(map<int, array<float, 4>> &i_point_map, i
                    case 1:  //当前有一个手指头按下
                        _status = -1;
                        _pen_handler_id = -1;
-                       isHorizontal= false;
 
                        break;
                    case 2: // 当前有两个手指头按下
@@ -612,8 +620,6 @@ bool RectParent::touchEvent(map<int, array<float, 4>> &i_point_map, int i_event_
         float y=this->getTranslateY();
 
         this->setTranslateY(p[3] - _down_y + y);
-
-        isHorizontal= false;
 
         return true;
     }

@@ -67,6 +67,8 @@ public:
 
     Rect * getRectAt(shared_ptr<Rect> &i_rect, float i_x, float i_y,
                      Rect *i_lastRoute)noexcept;
+    void setParentRect(Rect * i_parent)noexcept ;
+    void requestDisallowInterceptTouchEvent(bool i_requestDisallowInterceptTouchEvent)noexcept ;
 
 private:
     float _width;
@@ -83,6 +85,10 @@ private:
 
     TouchListener * _touchListener= nullptr;
     Rect * _touchChildren;
+    Rect * _parent;
+
+protected:
+    bool _requestDisallowInterceptTouchEvent=false;
 
 };
 
@@ -96,8 +102,6 @@ private :
 
     float _down_x=0.0f;
     float _down_y=0.0f;
-
-    bool isHorizontal=false;
 
 public:
     bool onInterceptTouchEvent(map<int, array<float, 4>> &i_point_map, int i_point_id,

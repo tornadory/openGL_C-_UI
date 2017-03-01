@@ -899,8 +899,8 @@ bool NativeContext::touchEvent(int i_event_type, int i_point_id, Rect *i_rect) n
                     float x=_rect_2->getTranslateX();
                     float y=_rect_2->getTranslateY();
 
-                    dbglog("========touchEvent====222==============");
                     _rect_2->setTranslateX(p[2] - _down_x + x);
+                    _rect_2->requestDisallowInterceptTouchEvent(true);
                 }
                 break;
             }
@@ -936,6 +936,7 @@ bool NativeContext::touchEvent(int i_event_type, int i_point_id, Rect *i_rect) n
                     case 1:  //当前有一个手指头按下
                         _status = -1;
                         _pen_handler_id = -1;
+                        _rect_2->requestDisallowInterceptTouchEvent(false);
 
                         break;
                     case 2: // 当前有两个手指头按下
