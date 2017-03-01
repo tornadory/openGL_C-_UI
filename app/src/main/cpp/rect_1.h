@@ -12,6 +12,8 @@ public:
 
     //更新完 translate rotate scale 数据，并显示
     void setTranslate(float i_x, float i_y)noexcept;
+    void setTranslateY(float i_y)noexcept;
+    void setTranslateX(float i_x)noexcept;
     void setRotate(float i_x,float i_y)noexcept;
     void setScale(float i_kx,float i_ky)noexcept ;
     void draw(RenderContext &i_rendContext, Matrix3X2 i_matix)noexcept ;
@@ -49,10 +51,10 @@ public:
     bool depatchTouchEvent(map<int, array<float, 4>> &i_point_map, int i_event_type,
                            int i_point_id, bool i_is_first_down, Matrix3X2 &i_mat, float i_x=-1,
                            float i_y=-1)noexcept ;
-    bool onInterceptTouchEvent(map<int, array<float, 4>> &i_point_map, int i_point_id,
+    virtual bool onInterceptTouchEvent(map<int, array<float, 4>> &i_point_map, int i_point_id,
                                    int i_event_type, Matrix3X2 &i_mat)noexcept ;
 
-    bool touchEvent(map<int, array<float, 4>> &i_point_map, int i_event_type, int i_point_id,
+    virtual bool touchEvent(map<int, array<float, 4>> &i_point_map, int i_event_type, int i_point_id,
                         Matrix3X2 &i_mat) noexcept;
 
     bool touchEventRect(map<int, array<float, 4>> &i_point_map, int i_event_type, int i_point_id,
@@ -84,3 +86,23 @@ private:
 
 };
 
+
+struct RectParent :Rect
+{
+private :
+    int _status=-1;
+    int _pen_handler_id=-1;
+    array<float,2> _scale_handler_ids={-1,-1};
+
+    float _down_x=0.0f;
+    float _down_y=0.0f;
+
+    bool isHorizontal=false;
+
+public:
+    bool onInterceptTouchEvent(map<int, array<float, 4>> &i_point_map, int i_point_id,
+                               int i_event_type, Matrix3X2 &i_mat)noexcept override ;
+
+    bool touchEvent(map<int, array<float, 4>> &i_point_map, int i_event_type, int i_point_id,
+                            Matrix3X2 &i_mat) noexcept override;
+};

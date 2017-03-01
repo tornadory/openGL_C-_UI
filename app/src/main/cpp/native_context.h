@@ -52,7 +52,7 @@ private:
 
     Rect * _rectTouch;
 
-    shared_ptr<Rect> _rect=make_shared<Rect>();
+    shared_ptr<Rect> _rect=make_shared<RectParent>();
     shared_ptr<Rect> _rect_1=make_shared<Rect>();
     shared_ptr<Rect> _rect_2=make_shared<Rect>();
     shared_ptr<Rect> _rect_3=make_shared<Rect>();

@@ -23,6 +23,15 @@ void Rect::setTranslate(float i_x, float i_y) noexcept
     _translate[0]=i_x;
     _translate[1]=i_y;
 }
+void Rect::setTranslateY( float i_y) noexcept
+{
+    _translate[1]=i_y;
+}
+
+void Rect::setTranslateX(float i_x)noexcept
+{
+    _translate[0]=i_x;
+}
 
 void Rect::setInitVertex(float i_x, float i_y) noexcept
 {
@@ -358,36 +367,61 @@ bool Rect::depatchTouchEvent(map<int, array<float, 4>> &i_point_map, int i_event
             updatePointMap(i_point_map,i_point_id,mat);
         }
 
-        if(onInterceptTouchEvent(i_point_map, i_point_id, i_event_type, mat)) //拦截的话,处理children的 touchChildren=nullptr
+        if(onInterceptTouchEvent(i_point_map, i_point_id, i_event_type, mat) && !i_event_type!=4) //拦截的话,处理children的 touchChildren=nullptr
         {
 
-            deleteTouchChild(this);
+            if(_touchChildren!= nullptr)
+            {
+                _touchChildren->depatchTouchEvent(i_point_map,4,i_point_id,i_is_first_down,mat,-1,-1);
+                _touchChildren=nullptr;
+            }
 
             return touchEvent(i_point_map, i_event_type, i_point_id, mat);
 
         } else
         {
-            if(_touchChildren!= nullptr)
+
+            if(i_event_type==4)
             {
-                if(_touchChildren->depatchTouchEvent(i_point_map,i_event_type,i_point_id,i_is_first_down,mat,-1,-1))
+                onInterceptTouchEvent(i_point_map, i_point_id, i_event_type, mat);
+                touchEvent(i_point_map, i_event_type, i_point_id, mat);
+
+                if(_touchChildren!= nullptr)
                 {
+                    _touchChildren->depatchTouchEvent(i_point_map,4,i_point_id,i_is_first_down,mat,-1,-1);
+                    _touchChildren= nullptr;
+
                     return true;
 
                 } else
                 {
-                    if(i_event_type==2)
-                    {
-                        updatePointMap(i_point_map,mat);
-                    } else
-                    {
-                        updatePointMap(i_point_map,i_point_id,mat);
-                    }
-
-                    return touchEvent(i_point_map, i_event_type, i_point_id, mat);
+                    return true;
                 }
+
             } else
             {
-                return touchEvent(i_point_map, i_event_type, i_point_id, mat);
+                if(_touchChildren!= nullptr)
+                {
+                    if(_touchChildren->depatchTouchEvent(i_point_map,i_event_type,i_point_id,i_is_first_down,mat,-1,-1))
+                    {
+                        return true;
+
+                    } else
+                    {
+                        if(i_event_type==2)
+                        {
+                            updatePointMap(i_point_map,mat);
+                        } else
+                        {
+                            updatePointMap(i_point_map,i_point_id,mat);
+                        }
+
+                        return touchEvent(i_point_map, i_event_type, i_point_id, mat);
+                    }
+                } else
+                {
+                    return touchEvent(i_point_map, i_event_type, i_point_id, mat);
+                }
             }
         }
     }
@@ -464,26 +498,128 @@ void Rect::updatePointMap(map<int, array<float, 4>>& i_point_map, Matrix3X2& i_m
 
         i->second[2]=p[0]+_center[0] * _width;
         i->second[3]=p[1]+_center[1] * _height;
-
-        dbglog("=%f===%d==%f,%f,%f,%f",_width,i->first, i->second[0], i->second[1], i->second[2], i->second[3]);
     }
 }
 
 
+bool RectParent::onInterceptTouchEvent(map<int, array<float, 4>> &i_point_map, int i_point_id,
+                                        int i_event_type, Matrix3X2 &i_mat) noexcept {
 
+       switch (i_event_type) {
+           case 1: {
 
+               auto p = i_point_map.find(i_point_id)->second;
 
+               switch (_status) {
+                   case -1: //当前没有手指头按下。按下第一个手指头
+                       _status = 1;
+                       _pen_handler_id = i_point_id;
+                       break;
+                   case 1:  //当前有一个手指头按下。按下第二个手指头
+                       _status = 2;
+                       _scale_handler_ids[0] = _pen_handler_id;
+                       _pen_handler_id = -1;
+                       _scale_handler_ids[1] = i_point_id;
+                       break;
+                   case 2:
+                       break;
+               }
+               if (_status == 1) {
 
+                   _down_x = p[2];
+                   _down_y = p[3];
 
+               } else if (_status == 2) {
+               }
+           }
+               return false;
 
+           case 2: {
 
+               if (_status == 2) {
 
+               }
+               else if (_status == 1) {
 
+                   auto p = i_point_map.find(_pen_handler_id)->second;
 
+                   if(abs(p[3] - _down_y)>abs(p[2]-_down_x)&&!isHorizontal)
+                   {
+                       return true;
 
+                   } else
+                   {
+                       isHorizontal= true;
 
+                       _down_x=p[2];
+                       _down_y=p[3];
+                   }
+               }
 
+               return false;
+           }
+           case 3: {
 
+               if (_status == 2) {
+                   if (_scale_handler_ids[0] == i_point_id) {
+                       auto p = i_point_map.find(_scale_handler_ids[1])->second;
 
+                       _down_x = p[2];
+                       _down_y = p[3];
+
+                       _pen_handler_id = i_point_map.find(_scale_handler_ids[1])->first;
+
+                   } else {
+                       auto p = i_point_map.find(_scale_handler_ids[0])->second;
+
+                       _down_x = p[2];
+                       _down_y = p[3];
+
+                       _pen_handler_id = i_point_map.find(_scale_handler_ids[0])->first;
+                   }
+
+               } else if (_status == 1) {
+
+                   _down_x = 0.0f;
+                   _down_y = 0.0f;
+               }
+
+               switch (_status) {
+                   case -1: //当前没有手指头按下
+                       break;
+                   case 1:  //当前有一个手指头按下
+                       _status = -1;
+                       _pen_handler_id = -1;
+                       isHorizontal= false;
+
+                       break;
+                   case 2: // 当前有两个手指头按下
+                       _status = 1;
+                       break;
+               }
+               return false;
+           }
+       }
+   }
+
+bool RectParent::touchEvent(map<int, array<float, 4>> &i_point_map, int i_event_type,
+                             int i_point_id, Matrix3X2 &i_mat) noexcept {
+
+    if(i_event_type==2)
+    {
+        auto p = i_point_map.find(_pen_handler_id)->second;
+
+        float y=this->getTranslateY();
+
+        this->setTranslateY(p[3] - _down_y + y);
+
+        isHorizontal= false;
+
+        return true;
+    }
+
+    return false;
+
+}
 
 
