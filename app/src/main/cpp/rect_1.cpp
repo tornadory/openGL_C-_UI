@@ -445,6 +445,14 @@ bool Rect::touchEvent(map<int, array<float, 4>> &i_point_map, int i_event_type, 
                       Matrix3X2 &i_mat) noexcept
 {
 
+    if(i_event_type==3)
+    {
+        dbglog("===%f===%d==touchEvent=upupup==");
+        deleteTouchChildFromChild();
+        requestDisallowInterceptTouchEvent(true);
+        _isChildrenIntercept=true;
+    }
+
     if(_touchListener!= nullptr&&_touchListener->touchEvent(i_event_type,i_point_id,this))
     {
         return true;
@@ -461,21 +469,37 @@ bool Rect::touchEventRect(map<int, array<float, 4>> &i_point_map, int i_event_ty
     return false;
 }
 
-void Rect::deleteTouchChild(Rect *i_rect) noexcept
+void Rect::deleteTouchChild() noexcept
 {
-    if(i_rect!= nullptr)
+    if(this!= nullptr)
     {
-        if(i_rect->_touchChildren!=nullptr)
+        if(this->_touchChildren!=nullptr)
         {
-            i_rect->_touchChildren->deleteTouchChild(i_rect->_touchChildren);
+            this->_touchChildren->deleteTouchChild();
 
-            i_rect->_touchChildren = nullptr;
+            this->_touchChildren = nullptr;
 
             return ;
 
         } else
         {
             return ;
+        }
+    }
+}
+
+void Rect::deleteTouchChildFromChild() noexcept
+{
+    if(this!= nullptr)
+    {
+        if(this->_parent!= nullptr)
+        {
+            this->_parent->deleteTouchChildFromChild();
+            this->_touchChildren= nullptr;
+
+        } else
+        {
+            this->_touchChildren= nullptr;
         }
     }
 }
@@ -488,7 +512,8 @@ void Rect::updatePointMap(map<int, array<float, 4>> &i_point_map, int i_point_id
     i[2] = p[0]+_center[0] * _width;
     i[3] = p[1]+_center[1] * _height;
 
-//    dbglog("%d==%f,%f,%f,%f",i_point_map.find(i_point_id)->first,i[0],i[1],i[2],i[3]);
+//    dbglog("%d==%f==down1=%f,%f,%f,%f",i_point_map.find(i_point_id)->first,_height,i[0],i[1],p[0],p[1]);
+//    dbglog("%d==%f==dwon2=%f,%f,%f,%f",i_point_map.find(i_point_id)->first,_height,i[0],i[1],i[2],i[3]);
 }
 
 void Rect::updatePointMap(map<int, array<float, 4>>& i_point_map, Matrix3X2& i_mat) noexcept
@@ -512,7 +537,7 @@ void Rect::requestDisallowInterceptTouchEvent(bool i_requestDisallowInterceptTou
     if(_parent!= nullptr)
     {
         _parent->requestDisallowInterceptTouchEvent(i_requestDisallowInterceptTouchEvent);
-        _parent->_requestDisallowInterceptTouchEvent=i_requestDisallowInterceptTouchEvent;
+        _parent->_isChildrenIntercept=i_requestDisallowInterceptTouchEvent;
     }
 
 }
@@ -520,6 +545,8 @@ void Rect::requestDisallowInterceptTouchEvent(bool i_requestDisallowInterceptTou
 
 bool RectParent::onInterceptTouchEvent(map<int, array<float, 4>> &i_point_map, int i_point_id,
                                         int i_event_type, Matrix3X2 &i_mat) noexcept {
+
+    dbglog("===%f===%d==onInterceptTouchEvent===",this->getWidth(),_isChildrenIntercept);
 
        switch (i_event_type) {
            case 1: {
@@ -552,19 +579,10 @@ bool RectParent::onInterceptTouchEvent(map<int, array<float, 4>> &i_point_map, i
 
            case 2: {
 
-               if (_status == 2) {
-
+               if(!_isChildrenIntercept)
+               {
+                   return true;
                }
-               else if (_status == 1) {
-
-                   auto p = i_point_map.find(_pen_handler_id)->second;
-
-                   if(abs(p[3] - _down_y)>abs(p[2]-_down_x)&&!_requestDisallowInterceptTouchEvent)
-                   {
-                       return true;
-                   }
-               }
-
                return false;
            }
            case 3: {
@@ -613,17 +631,33 @@ bool RectParent::onInterceptTouchEvent(map<int, array<float, 4>> &i_point_map, i
 bool RectParent::touchEvent(map<int, array<float, 4>> &i_point_map, int i_event_type,
                              int i_point_id, Matrix3X2 &i_mat) noexcept {
 
-    if(i_event_type==2)
+    if(i_event_type==3)
     {
-        auto p = i_point_map.find(_pen_handler_id)->second;
-
-        float y=this->getTranslateY();
-
-        this->setTranslateY(p[3] - _down_y + y);
-
-        return true;
+        dbglog("===%f===%d==RectParent==touchEvent=upupup==");
+        deleteTouchChildFromChild();
+        requestDisallowInterceptTouchEvent(true);
+        _isChildrenIntercept=true;
     }
 
+//    dbglog("===%f===%d==touchEvent===",this->getWidth(),i_event_type);
+
+    if(_touchListener!= nullptr&&_touchListener->touchEvent(i_event_type,i_point_id,this))
+    {
+        return true;
+
+    } else
+    {
+        if(i_event_type==2)
+        {
+            auto p = i_point_map.find(_pen_handler_id)->second;
+
+            float y=this->getTranslateY();
+
+            this->setTranslateY(p[3] - _down_y + y);
+
+            return true;
+        }
+    }
     return false;
 
 }

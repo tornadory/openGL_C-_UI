@@ -110,22 +110,22 @@ void NativeContext::draw()noexcept {
 
 void NativeContext::initRect() noexcept {
     _rect->setWidth(400);
-    _rect->setHeight(800);
+    _rect->setHeight(400);
     _rect->setCenter(0.5f, 0.5f);
     _rect->setInitVertex(20.0f, 30.0f);
     _rect->setColor({1.0f, 1.0f, 1.0f, 1.0f});
 
     _rect_1->setWidth(100);
-    _rect_1->setHeight(500);
+    _rect_1->setHeight(600);
     _rect_1->setCenter(0.5f, 0.5f);
     array<float, 2> a = _rect->transformPosition(20.0f, 40.0f);
     _rect_1->setInitVertex(a[0], a[1]);
     _rect_1->setColor({0.0f, 0.0f, 1.0f, 1.0f});
 
     _rect_2->setWidth(200);
-    _rect_2->setHeight(400);
+    _rect_2->setHeight(600);
     _rect_2->setCenter(0.5f, 0.5f);
-    a = _rect->transformPosition(150.0f, 40.0f);
+    a = _rect->transformPosition(150.0f, -140.0f);
     _rect_2->setInitVertex(a[0], a[1]);
     _rect_2->setColor({0.0f, 1.0f, 0.0f, 1.0f});
     _rect_2->setTouchListener(this);
@@ -852,111 +852,337 @@ void NativeContext::handleTouch(int i_event_type, int i_point_id)noexcept {
 //    return true;
 //}
 
-//scrollView 5-1
+////scrollView 5-1
+//bool NativeContext::touchEvent(int i_event_type, int i_point_id, Rect *i_rect) noexcept
+//{
+//    if(i_rect==_rect.get())
+//    {
+//        switch(i_event_type)
+//        {
+//            case 1: {
+//
+//                auto p = _point_map.find(i_point_id)->second;
+//
+//                float x0=p[2]-_rect->getWidth()/2;
+//                float y0=p[3]-_rect->getHeight()/2;
+//
+//                Matrix3X2 mat=Matrix3X2::translation(-_rect_2->getTranslateX(),-_rect_2->getTranslateY()).rotate(_rect_2->getCos(),-_rect_2->getSin()).scale(1/_rect_2->getScaleX(),1/_rect_2->getScaleY());
+//                auto a=mat.transformPoint({x0,y0});
+//
+//                float x=a[0]+_rect_2->getWidth()/2;
+//                float y=a[1]+_rect_2->getHeight()/2;
+//
+//                //判断 _rect 的点，是否在_rect_2上面
+//                if(x >= 0 && x <= _rect_2->getWidth() && y >= 0 && y <= _rect_2->getHeight()&&isFirstDown)
+//                {
+//                    isRectDeal=true;
+//
+//                } else
+//                {
+//                    if(!isRectDeal)
+//                    {
+//                        return false;
+//                    }
+//                }
+//
+//                if(isRectDeal)
+//                {
+//                    switch (_status) {
+//                        case -1: //当前没有手指头按下。按下第一个手指头
+//                            _status = 1;
+//                            _pen_handler_id = i_point_id;
+//                            break;
+//                        case 1:  //当前有一个手指头按下。按下第二个手指头
+//                            _status = 2;
+//                            _scale_handler_ids[0] = _pen_handler_id;
+//                            _pen_handler_id = -1;
+//                            _scale_handler_ids[1] = i_point_id;
+//                            break;
+//                        case 2:
+//                            break;
+//                    }
+//                    if (_status == 1) {
+//
+//                        _down_x = p[2];
+//                        _down_y = p[3];
+//
+//                        _offset_x = _rect_2->getTranslateX();
+//                        _offset_y = _rect_2->getTranslateY();
+//
+//                    } else if (_status == 2) {
+//
+//                    }
+//
+//                    return true;
+//                }
+//
+//            }
+//                break;
+//            case 2: {
+//
+//                if(isRectDeal) {
+//                    if (_status == 2) {
+//
+//                    }
+//                    else if (_status == 1) {
+//
+//                        auto p = _point_map.find(_pen_handler_id)->second;
+//
+//                        float y1=p[3] - _down_y + _offset_y;
+//
+//                        float y2=(_rect->transformPosition(0.0f,0.0f))[1]+_rect_2->getHeight()/2;
+//                        float y3=(_rect->transformPosition(0.0f,_rect->getHeight()-_rect_2->getHeight()))[1]+_rect_2->getHeight()/2;
+//
+//                        if(y1<y2&&y1>y3)
+//                        {
+//                            _rect_2->setTranslateY(y1);
+//                        } else
+//                        {
+//                            if(isFirstMove)
+//                            {
+//                                isFirstMove=false;
+//                                _rect_2->requestDisallowInterceptTouchEvent(false);
+//
+//                                return false;
+//                            } else
+//                            {
+//                                if(y1>=y2)
+//                                {
+//                                    _rect_2->setTranslateY(y2);
+//                                }else if(y3<y1)
+//                                {
+//                                    _rect_2->setTranslateY(y3);
+//                                }
+//                            }
+//                        }
+//
+//                        dbglog("=========222222==========");
+//                        isFirstMove=false;
+//                        _rect_2->requestDisallowInterceptTouchEvent(true);
+//                        return true;
+//                    }
+//                }
+//            }
+//            case 3: {
+//
+//                if(isRectDeal)
+//                {
+//                    if (_status == 2)
+//                    {
+//                        if (_scale_handler_ids[0] == i_point_id) {
+//                            auto p = _point_map.find(_scale_handler_ids[1])->second;
+//
+//                            _down_x = p[2];
+//                            _down_y = p[3];
+//
+//                            _pen_handler_id = _point_map.find(_scale_handler_ids[1])->first;
+//
+//                        } else {
+//                            auto p = _point_map.find(_scale_handler_ids[0])->second;
+//
+//                            _down_x = p[2];
+//                            _down_y = p[3];
+//
+//                            _pen_handler_id = _point_map.find(_scale_handler_ids[0])->first;
+//                        }
+//
+//                        _scale_handler_ids[0] = -1;
+//                        _scale_handler_ids[1] = -1;
+//
+//                    } else if (_status == 1) {
+//                        _down_x = 0.0f;
+//                        _down_y = 0.0f;
+//                    }
+//
+//                    switch (_status) {
+//                        case -1: //当前没有手指头按下
+//                            break;
+//                        case 1:  //当前有一个手指头按下
+//                            _status = -1;
+//                            _pen_handler_id = -1;
+//
+//                            isRectDeal=false;
+//                            break;
+//                        case 2: // 当前有两个手指头按下
+//                            _status = 1;
+//
+//                            break;
+//                    }
+//
+//                    isFirstMove= true;
+//                    return true;
+//                }
+//            }
+//            case 4:
+//
+//                _status = -1;
+//                _pen_handler_id = -1;
+//
+//                isRectDeal=false;
+//
+//                isFirstMove= true;
+//                break;
+//        }
+//    }
+//
+//    return false;
+//}
+
+//scrollView 5-1 修正
 bool NativeContext::touchEvent(int i_event_type, int i_point_id, Rect *i_rect) noexcept
 {
-    if (i_rect == _rect_2.get()||i_rect==_rect_3.get())
+    if(i_rect ==_rect_2.get())
     {
-        switch (i_event_type) {
+        switch(i_event_type)
+        {
             case 1: {
-
-                auto p = _point_map.find(i_point_id)->second;
-
-                switch (_status) {
-                    case -1: //当前没有手指头按下。按下第一个手指头
-                        _status = 1;
-                        _pen_handler_id = i_point_id;
-                        break;
-                    case 1:  //当前有一个手指头按下。按下第二个手指头
-                        _status = 2;
-                        _scale_handler_ids[0] = _pen_handler_id;
-                        _pen_handler_id = -1;
-                        _scale_handler_ids[1] = i_point_id;
-                        break;
-                    case 2:
-                        break;
-                }
-                if (_status == 1) {
-
-                    _down_x = p[2];
-                    _down_y = p[3];
-
-                } else if (_status == 2)
                 {
+                    switch (_status) {
+                        case -1: //当前没有手指头按下。按下第一个手指头
+                            _status = 1;
+                            _pen_handler_id = i_point_id;
+                            break;
+                        case 1:  //当前有一个手指头按下。按下第二个手指头
+                            _status = 2;
+                            _scale_handler_ids[0] = _pen_handler_id;
+                            _pen_handler_id = -1;
+                            _scale_handler_ids[1] = i_point_id;
+                            break;
+                        case 2:
+                            break;
+                    }
+                    if (_status == 1)
+                    {
+                        auto a = _point_map.find(_pen_handler_id)->second;
 
+                        float x0=a[2]-_rect_2->getWidth()*_rect_2->getCenterX();
+                        float y0=a[3]-_rect_2->getHeight()*_rect_2->getCenterY();
+                        Matrix3X2 mat=Matrix3X2::scaling(_rect_2->getScaleX(),_rect_2->getScaleY()).rotate(_rect_2->getCos(),_rect_2->getSin()).translate(_rect_2->getTranslateX(),_rect_2->getTranslateY());
+                        auto p=mat.transformPoint({x0,y0});
+
+                        _down_x = p[0];
+                        _down_y = p[1];
+
+//                        dbglog("down===%f,%f",_down_x,_down_y);
+
+                        _offset_x = _rect_2->getTranslateX();
+                        _offset_y = _rect_2->getTranslateY();
+
+                    } else if (_status == 2) {
+
+                    }
+
+                    return true;
                 }
-            }
 
-                break;
+            }
             case 2: {
 
-                if (_status == 2) {
-                }
-                else if (_status == 1) {
+                    if (_status == 2) {
 
-                    auto p = _point_map.find(_pen_handler_id)->second;
+                    }
+                    else if (_status == 1) {
 
-                    float x=_rect_2->getTranslateX();
-                    float y=_rect_2->getTranslateY();
+                        auto a = _point_map.find(_pen_handler_id)->second;
+                        float x0=a[2]-_rect_2->getWidth()*_rect_2->getCenterX();
+                        float y0=a[3]-_rect_2->getHeight()*_rect_2->getCenterY();
+                        Matrix3X2 mat=Matrix3X2::scaling(_rect_2->getScaleX(),_rect_2->getScaleY()).rotate(_rect_2->getCos(),_rect_2->getSin()).translate(_rect_2->getTranslateX(),_rect_2->getTranslateY());
+                        auto p=mat.transformPoint({x0,y0});
 
-                    _rect_2->setTranslateX(p[2] - _down_x + x);
-                    _rect_2->requestDisallowInterceptTouchEvent(true);
-                }
-                break;
+//                        dbglog("move===%f,%f",p[0],p[1]);
+
+                        float y1=p[1] - _down_y + _offset_y;
+
+                        float y2=(_rect->transformPosition(0.0f,0.0f))[1]+_rect_2->getHeight()*_rect_2->getCenterX();
+                        float y3=(_rect->transformPosition(0.0f,_rect->getHeight()-_rect_2->getHeight()))[1]+_rect_2->getHeight()*_rect_2->getCenterY();
+
+                        dbglog("move===%f,%f,%f,%f",_offset_y,y1,y2,y3);
+
+                        if(y1<y2&&y1>y3)
+                        {
+                            _rect_2->setTranslateY(y1);
+                        } else
+                        {
+                            if(isFirstMove)
+                            {
+                                isFirstMove=false;
+                                _rect_2->requestDisallowInterceptTouchEvent(false);
+
+                                return false;
+                            } else
+                            {
+                                if(y1>=y2)
+                                {
+                                    _rect_2->setTranslateY(y2);
+                                }else if(y3<=y1)
+                                {
+                                    _rect_2->setTranslateY(y3);
+                                }
+                            }
+                        }
+
+                        isFirstMove=false;
+                        _rect_2->requestDisallowInterceptTouchEvent(true);
+                        return true;
+                    }
             }
             case 3: {
 
-                if (_status == 2) {
-                    if (_scale_handler_ids[0] == i_point_id) {
-                        auto p = _point_map.find(_scale_handler_ids[1])->second;
+                    if (_status == 2)
+                    {
+                        if (_scale_handler_ids[0] == i_point_id) {
+                            auto p = _point_map.find(_scale_handler_ids[1])->second;
 
-                        _down_x = p[2];
-                        _down_y = p[3];
+                            _down_x = p[2];
+                            _down_y = p[3];
 
-                        _pen_handler_id = _point_map.find(_scale_handler_ids[1])->first;
+                            _pen_handler_id = _point_map.find(_scale_handler_ids[1])->first;
 
-                    } else {
-                        auto p = _point_map.find(_scale_handler_ids[0])->second;
+                        } else {
+                            auto p = _point_map.find(_scale_handler_ids[0])->second;
 
-                        _down_x = p[2];
-                        _down_y = p[3];
+                            _down_x = p[2];
+                            _down_y = p[3];
 
-                        _pen_handler_id = _point_map.find(_scale_handler_ids[0])->first;
+                            _pen_handler_id = _point_map.find(_scale_handler_ids[0])->first;
+                        }
+
+                        _scale_handler_ids[0] = -1;
+                        _scale_handler_ids[1] = -1;
+
+                    } else if (_status == 1) {
+                        _down_x = 0.0f;
+                        _down_y = 0.0f;
                     }
 
-                } else if (_status == 1) {
+                    switch (_status) {
+                        case -1: //当前没有手指头按下
+                            break;
+                        case 1:  //当前有一个手指头按下
+                            _status = -1;
+                            _pen_handler_id = -1;
 
-                    _down_x = 0.0f;
-                    _down_y = 0.0f;
-                }
+                            _rect_2->requestDisallowInterceptTouchEvent(true);
 
-                switch (_status) {
-                    case -1: //当前没有手指头按下
-                        break;
-                    case 1:  //当前有一个手指头按下
-                        _status = -1;
-                        _pen_handler_id = -1;
-                        _rect_2->requestDisallowInterceptTouchEvent(false);
+                            break;
+                        case 2: // 当前有两个手指头按下
+                            _status = 1;
 
-                        break;
-                    case 2: // 当前有两个手指头按下
-                        _status = 1;
+                            break;
+                    }
 
-                        break;
-                }
-                break;
+                    isFirstMove= true;
+                    return true;
             }
             case 4:
-            {
-                _down_x = 0.0f;
-                _down_y = 0.0f;
 
                 _status = -1;
                 _pen_handler_id = -1;
-            }
-        }
 
-        return true;
+                isFirstMove= true;
+//                _rect_2->requestDisallowInterceptTouchEvent(true);
+                break;
+        }
     }
 
     return false;

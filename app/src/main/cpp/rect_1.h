@@ -60,7 +60,8 @@ public:
     bool touchEventRect(map<int, array<float, 4>> &i_point_map, int i_event_type, int i_point_id,
                     Matrix3X2 &i_mat) noexcept;
 
-    void deleteTouchChild(Rect * i_rect)noexcept ;
+    void deleteTouchChild()noexcept ;
+    void deleteTouchChildFromChild()noexcept ;
 
     void updatePointMap(map<int, array<float, 4>> &i_point_map,int i_point_id, Matrix3X2& i_mat)noexcept ;
     void updatePointMap(map<int, array<float, 4>> &i_point_map, Matrix3X2& i_mat)noexcept ;
@@ -83,12 +84,12 @@ private:
     list<shared_ptr<Rect>> _rectChildren;
     Matrix3X2 _inverseMatrix;
 
-    TouchListener * _touchListener= nullptr;
     Rect * _touchChildren;
     Rect * _parent;
 
 protected:
-    bool _requestDisallowInterceptTouchEvent=false;
+    bool _isChildrenIntercept= true;
+    TouchListener * _touchListener= nullptr;
 
 };
 

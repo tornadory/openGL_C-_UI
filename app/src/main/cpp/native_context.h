@@ -86,4 +86,9 @@ private:
 
     array<float,4> _startPoints;
 
+    bool isFirstMove= true;
+
+    float _offset_x=-1.0f;
+    float _offset_y=-1.0f;
+
 };
