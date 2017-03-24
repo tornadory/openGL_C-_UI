@@ -70,6 +70,7 @@ public:
                      Rect *i_lastRoute)noexcept;
     void setParentRect(Rect * i_parent)noexcept ;
     void requestDisallowInterceptTouchEvent(bool i_requestDisallowInterceptTouchEvent)noexcept ;
+    bool getIsChildrenIntercept()noexcept ;
 
 private:
     float _width;
